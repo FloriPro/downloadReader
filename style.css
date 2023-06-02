@@ -209,6 +209,7 @@ button:hover {
     font-size: 30px;
     font-weight: bold;
     margin-bottom: 20px;
+    overflow-wrap: anywhere;
 }
 
 #pageUrl {
@@ -260,6 +261,7 @@ button:hover {
     font-size: 30px;
     font-weight: bold;
     margin-bottom: 20px;
+    overflow-wrap: anywhere;
 }
 
 #selectOptions button {
