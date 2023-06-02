@@ -1,0 +1,11 @@
+{
+  "autorun": false,
+  "terminals": [
+    {
+      "name": "PowerShell",
+      "description": "",
+      "focus": true,
+      "command": ""
+    }
+  ]
+}

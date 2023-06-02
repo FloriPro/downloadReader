@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#ecd96f">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reader Downloader</title>
+    <script src="index.js"></script>
+    <script src="Readability.js"></script>
+    <script src="JSDOM.js"></script>
+    <script src="purify.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <!--Service Worker-->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('sw.js').then(function (registration) {
+                    // Registration was successful
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function (err) {
+                    // registration failed :(
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <div id="loading" style="display: none;">
+        <div class="lds-ellipsis">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <p id="loadingStandardInfo">Loading...</p>
+        <div id="loadingMessages">
+        </div>
+    </div>
+    <div id="home">
+        <h1>Reader Downloader</h1>
+        <button id="btnDownload">Add Url</button>
+        <div id="reader"></div>
+        <div id="downloadedPages">
+        </div>
+        <hr>
+        <button onclick="if(confirm('Realy delete everything?'))CONTROLLER.database.fulldelete()">Clear
+            Database</button>
+        <button onclick="location.reload();">Reload</button>
+    </div>
+    <div id="page" class="">
+        <div id="pageOptions" class="styleColorUpdate">
+            <div id="autoGenDisplayTypes"></div>
+            <button onclick="GUI.pageReader.edit();">Edit</button>
+            <br>
+            <button onclick="GUI.showTab('Home'); GUI.pageReader.toggleOptions();">Back</button>
+        </div>
+        <p id="pageUrl" onclick="window.open(this.innerText)"></p>
+        <div id="pageContent">
+            <p id="pageContentTitle"></p>
+            <div id="pageContentBody">
+            </div>
+        </div>
+        <div id="editPanel" style="display: none;" class="styleColorUpdate">
+            <div id="editPanelRemoveTexts">
+                <div id="editPanelRemoveTextsList">
+                </div>
+                <input id="editPanelRemoveTextsInput" type="text" placeholder="Text to remove">
+                <button onclick="GUI.pageReader.addRemoveText();">Add</button>
+            </div>
+            <button onclick="GUI.pageReader.edit();">Exit</button>
+        </div>
+    </div>
+
+    <div id="select" style="display: none;">
+        <div id="selectWraper">
+            <p id="selectTitle">Title</p>
+            <div id="selectOptions">
+
+            </div>
+            <br>
+            <button id="selectClose">Close</button>
+        </div>
+    </div>
+</body>
+
+</html>

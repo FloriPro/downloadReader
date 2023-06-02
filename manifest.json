@@ -1,0 +1,21 @@
+{
+    "name": "Download Reader",
+    "short_name": "DR",
+    "start_url": "/",
+    "display": "fullscreen",
+    "background_color": "#fff",
+    "theme_color": "#fff",
+    "version": "0.0.1",
+    "icons": [
+        {
+            "src": "/images/icons-192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/images/icons-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ]
+}
