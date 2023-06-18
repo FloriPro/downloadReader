@@ -67,11 +67,21 @@
         </div>
         <div id="editPanel" style="display: none;" class="styleColorUpdate">
             <div id="editPanelRemoveTexts">
-                <div id="editPanelRemoveTextsList">
+                <div id="editPanelRemoveTextsList" class="editPanelList">
                 </div>
                 <input id="editPanelRemoveTextsInput" type="text" placeholder="Text to remove">
                 <button onclick="GUI.pageReader.addRemoveText();">Add</button>
             </div>
+            <hr>
+            <div id="editPanelReplaceTexts">
+                <div id="editPanelReplaceTextsList" class="editPanelList">
+                </div>
+                <input id="editPanelReplaceTextsInput" type="text" placeholder="Text to change">
+                <input id="editPanelReplaceTextsInput2" type="text" placeholder="Text to change to">
+                <button onclick="GUI.pageReader.addReplaceText();">Add</button>
+            </div>
+            <br>
+            <hr>
             <button onclick="GUI.pageReader.edit();">Exit</button>
         </div>
     </div>

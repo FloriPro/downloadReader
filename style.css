@@ -150,13 +150,13 @@ button:hover {
     border: 1px solid #ccc;
 }
 
-#editPanelRemoveTextsList {
+.editPanelList {
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 10px;
 }
 
-#editPanelRemoveTextsList p {
+.editPanelList p {
     margin: 0;
     padding: 0;
     margin-bottom: 5px;
@@ -164,7 +164,7 @@ button:hover {
     font-size: 15px;
 }
 
-#editPanelRemoveTextsList p:hover {
+.editPanelList p:hover {
     text-decoration: underline;
 }
 
@@ -418,4 +418,8 @@ button:hover {
 
 .type3size {
     font-size: 25px;
+}
+
+#editPanel hr {
+    width: 100%;
 }

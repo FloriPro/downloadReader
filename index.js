@@ -349,6 +349,10 @@ class pageReader {
         if (data.options.removedTexts) {
             this.removedTexts = data.options.removedTexts;
         }
+        this.replaceTexts = [];
+        if (data.options.replaceTexts) {
+            this.replaceTexts = data.options.replaceTexts;
+        }
         var editPanelRemoveTextsList = document.querySelector('#editPanelRemoveTextsList');
         editPanelRemoveTextsList.innerHTML = '';
         for (var t of this.removedTexts) {
@@ -357,6 +361,16 @@ class pageReader {
             p.title = "click to remove";
             p.onclick = this.removeRemoveText.bind(this, t);
             editPanelRemoveTextsList.appendChild(p);
+        }
+
+        var editPanelReplaceTextsList = document.querySelector('#editPanelReplaceTextsList');
+        editPanelReplaceTextsList.innerHTML = '';
+        for (var t of this.replaceTexts) {
+            var p = document.createElement('p');
+            p.innerText = t["from"] + " -> " + t["to"];
+            p.title = "click to remove";
+            p.onclick = this.removeEditText.bind(this, t);
+            editPanelReplaceTextsList.appendChild(p);
         }
     }
 
@@ -373,6 +387,26 @@ class pageReader {
     removeRemoveText(text) {
         this.removedTexts.splice(this.removedTexts.indexOf(text), 1);
         CONTROLLER.database.setPageOption(GUI.currentPage, "removedTexts", this.removedTexts).then(() => {
+            GUI.pageReader.makeEditPanel();
+        });
+    }
+
+    addReplaceText() {
+        var text = document.querySelector('#editPanelReplaceTextsInput').value;
+        var text2 = document.querySelector('#editPanelReplaceTextsInput2').value;
+        if (text && text != "" && text != " " && text2 && text2 != "" && text2 != " ") {
+            this.replaceTexts.push({ from: text, to: text2 });
+            CONTROLLER.database.setPageOption(GUI.currentPage, "replaceTexts", this.replaceTexts).then(() => {
+                GUI.pageReader.makeEditPanel();
+            });
+        }
+        document.querySelector('#editPanelReplaceTextsInput').value = "";
+        document.querySelector('#editPanelReplaceTextsInput2').value = "";
+    }
+
+    removeEditText(text) {
+        this.replaceTexts.splice(this.replaceTexts.indexOf(text), 1);
+        CONTROLLER.database.setPageOption(GUI.currentPage, "replaceTexts", this.replaceTexts).then(() => {
             GUI.pageReader.makeEditPanel();
         });
     }
@@ -765,6 +799,22 @@ class reader {
                 options.removedTexts.forEach((removedText) => {
                     if (text.includes(removedText)) {
                         node.nodeValue = text.replace(removedText, "");
+                    }
+                });
+            }
+        });
+
+        //replace specific texts
+        if (options.replaceTexts == undefined) options.replaceTexts = [];
+        div.querySelectorAll("*").forEach((element) => {
+            //only get text nodes
+            var walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            var node;
+            while (node = walker.nextNode()) {
+                var text = node.nodeValue;
+                options.replaceTexts.forEach((replaceText) => {
+                    if (text.includes(replaceText["from"])) {
+                        node.nodeValue = text.replaceAll(replaceText["from"], replaceText["to"]);
                     }
                 });
             }
