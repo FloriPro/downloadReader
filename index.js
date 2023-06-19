@@ -104,6 +104,13 @@ class gui {
         div.appendChild(pUrl);
 
         var btn = document.createElement('button');
+        btn.classList.add('redownload');
+        btn.innerText = 'Redownload';
+        btn.onclick = this.redownloadPage.bind(this, url);
+        div.appendChild(btn);
+
+        var btn = document.createElement('button');
+        btn.classList.add('delete');
         btn.innerText = 'Delete';
         btn.onclick = this.deletePage.bind(this, url);
         div.appendChild(btn);
@@ -124,6 +131,11 @@ class gui {
     }
     pageClick(url) {
         CONTROLLER.showPage(url);
+    }
+
+    redownloadPage(url) {
+        CONTROLLER.getPage(url);
+        event.stopPropagation();
     }
 
     deletePage(url) {
