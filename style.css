@@ -162,12 +162,17 @@ button.delete:hover{
     flex-direction: column;
 
     border: 1px solid #ccc;
+
+    overflow: auto;
 }
 
 .editPanelList {
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 10px;
+
+    max-height: 300px;
+    overflow: auto;
 }
 
 .editPanelList p {
