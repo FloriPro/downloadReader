@@ -311,6 +311,8 @@ class pageReader {
         this.optionsOpen = false;
         this.editPanelOpen = false;
         this.updateOptions();
+
+        this.massDownloadStuff = new massDownloadStuff();
     }
 
     /**
@@ -352,6 +354,10 @@ class pageReader {
             document.querySelector('#editPanel').style.display = 'none';
             CONTROLLER.reloadPage();
         }
+        document.querySelector("#editPanelMassDownloadLinksLoad").style.display = '';
+        document.querySelector("#editPanelMassDownloadLinksList").style.display = 'none';
+        document.querySelector("#editPanelMassDownloadLinksApply").style.display = 'none';
+        document.querySelector("#editPanelMassDownloadLinksCancel").style.display = 'none';
     }
 
     async makeEditPanel() {
@@ -421,6 +427,155 @@ class pageReader {
         CONTROLLER.database.setPageOption(GUI.currentPage, "replaceTexts", this.replaceTexts).then(() => {
             GUI.pageReader.makeEditPanel();
         });
+    }
+
+    async loadMassDownloadLinks() {
+        document.querySelector("#editPanelMassDownloadLinksApply").style.display = '';
+        document.querySelector("#editPanelMassDownloadLinksCancel").style.display = '';
+        document.querySelector("#editPanelMassDownloadLinksLoad").style.display = 'none';
+
+        document.querySelector("#editPanelMassDownloadLinksList").style.display = "";
+        document.querySelector("#editPanelMassDownloadLinksList").innerHTML = "";
+        var data = await CONTROLLER.database.getPage(GUI.currentPage);
+
+        var htmdiv = document.createElement("div");
+        htmdiv.innerHTML = data.content;
+        var links = htmdiv.querySelectorAll("a");
+
+        var plinks = [];
+        for (var link of links) {
+            var p = document.createElement("p");
+            p.innerText = link.innerText + " >> " + link.href;
+            p.onclick = this.massDownloadStuff.click.bind(this.massDownloadStuff, p, link.href, link.innerText);
+            document.querySelector("#editPanelMassDownloadLinksList").appendChild(p);
+            plinks.push(link.href);
+        }
+        this.massDownloadStuff.setLinks(plinks);
+    }
+
+    applyMassDownloadLinks() {
+        var links = this.massDownloadStuff.getLinks();
+        this.cancelMassDownloadLinks();
+
+        for (var link of links) {
+            CONTROLLER.getPage(link);
+        }
+    }
+    cancelMassDownloadLinks() {
+        document.querySelector("#editPanelMassDownloadLinksApply").style.display = 'none';
+        document.querySelector("#editPanelMassDownloadLinksCancel").style.display = 'none';
+        document.querySelector("#editPanelMassDownloadLinksList").style.display = "none";
+        document.querySelector("#editPanelMassDownloadLinksLoad").style.display = '';
+    }
+}
+
+class massDownloadStuff {
+    getLinks() {
+        var links = [];
+        for (var i = 0; i < this.links.length; i++) {
+            if (this.selected[i] == "clicked" || this.selected[i]) {
+                links.push(this.links[i]);
+            }
+        }
+        return links;
+    }
+    setLinks(links) {
+        this.clickeds = { start: -1, end: -1 };
+        this.startClicked = false;
+        this.endClicked = false;
+
+        this.links = links;
+        this.selected = [];
+        for (var link of this.links) {
+            this.selected.push(true);
+        }
+        this.updateSelected();
+    }
+
+    updateSelected() {
+        for (var i = 0; i < this.links.length; i++) {
+            if (this.selected[i] == "clicked") {
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].style.backgroundColor = "blue";
+            }
+            else if (this.selected[i]) {
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].style.backgroundColor = "green";
+            } else {
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].style.backgroundColor = "red";
+            }
+        }
+    }
+
+    updateSelection() {
+        if (this.clickeds.start != -1 && this.clickeds.end != -1) {
+            var start = Math.min(this.clickeds.start, this.clickeds.end);
+            var end = Math.max(this.clickeds.start, this.clickeds.end);
+            this.clickeds.start = start;
+            this.clickeds.end = end;
+            for (var i = 0; i < this.links.length; i++) {
+                if (i >= start && i <= end) {
+                    this.selected[i] = true;
+                } else {
+                    this.selected[i] = false;
+                }
+            }
+            if (this.startClicked) {
+                this.selected[this.clickeds.start] = "clicked";
+            }
+            if (this.endClicked) {
+                this.selected[this.clickeds.end] = "clicked";
+            }
+            this.updateSelected();
+        }
+    }
+
+    click(p, link, name) {
+        if (this.clickeds.start == -1 && this.clickeds.end == -1) {
+            this.clickeds.start = this.links.indexOf(link);
+            this.clickeds.end = this.links.indexOf(link);
+            this.updateSelection();
+            return;
+        }
+        var clickid = this.links.indexOf(link);
+        if (this.startClicked) {
+            this.clickeds.start = clickid;
+            this.startClicked = false;
+            this.updateSelection();
+            return;
+        }
+        if (this.endClicked) {
+            this.clickeds.end = clickid;
+            this.endClicked = false;
+            this.updateSelection();
+            return;
+        }
+
+        if (clickid < this.clickeds.start) {
+            this.clickeds.start = clickid;
+            this.updateSelection();
+            return;
+        }
+        if (clickid > this.clickeds.end) {
+            this.clickeds.end = clickid;
+            this.updateSelection();
+            return;
+        }
+
+        if (clickid == this.clickeds.start) {
+            this.startClicked = true;
+            this.updateSelection();
+            return;
+        }
+        if (clickid == this.clickeds.end) {
+            this.endClicked = true;
+            this.updateSelection();
+            return;
+        }
+
+        if (clickid > this.clickeds.start && clickid < this.clickeds.end) {
+            this.selected[clickid] = !this.selected[clickid];
+            this.updateSelected();
+            return;
+        }
     }
 }
 
