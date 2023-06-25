@@ -93,7 +93,8 @@ button:hover {
 button.delete {
     background-color: #f00;
     color: #fff;
-    border: 1px solid rgb(119, 0, 0);
+    border: 1px solid rgb(198 0 0);
+    transition: all 0.2s ease-in-out;
 }
 
 button.delete:hover {
@@ -438,6 +439,18 @@ button.delete:hover {
     background-color: rgb(0 171 255);
 }
 
+.type1color #selectWraper {
+    background-color: #fff;
+    border: 1px solid #ccc;
+}
+
+.type1color #loading {
+    background-color: #fff;
+}
+
+.type1color .lds-ellipsis div {
+    background-color: #000000;
+}
 
 /* ======================================== */
 /* type 2 */
@@ -474,6 +487,19 @@ button.delete:hover {
 
 .type2color #editPanelMassDownloadLinksList .clicked {
     background-color: rgb(0, 0, 163);
+}
+
+.type2color #selectWraper {
+    background-color: #000;
+    border: 1px solid #5f5f5f;
+}
+
+.type2color #loading {
+    background-color: #000;
+}
+
+.type2color .lds-ellipsis div {
+    background-color: #fff;
 }
 
 /* ======================================== */
@@ -513,6 +539,18 @@ button.delete:hover {
     background-color: rgb(0, 0, 119);
 }
 
+.type23color #selectWraper {
+    background-color: #000;
+    border: 1px solid #2e2e2e;
+}
+
+.type23color #loading {
+    background-color: #000;
+}
+
+.type23color .lds-ellipsis div {
+    background-color: #9e9e9e;
+}
 
 /* ======================================== */
 /* type 3 */
@@ -551,6 +589,18 @@ button.delete:hover {
     background-color: rgb(0, 0, 231);
 }
 
+.type3color #selectWraper {
+    background-color: #5a5151;
+    border: 1px solid #3d3d3d80;
+}
+
+.type3color #loading {
+    background-color: #5a5151;
+}
+
+.type3color .lds-ellipsis div {
+    background-color: #fff;
+}
 
 /* ======================================== */
 /* type 4: solarizedDarkColor */
@@ -590,6 +640,18 @@ button.delete:hover {
     background-color: rgb(27 27 100);
 }
 
+.solarizedDarkColor #selectWraper {
+    background-color: #002b36;
+    border: 1px solid #606b6e;
+}
+
+.solarizedDarkColor #loading {
+    background-color: #002b36;
+}
+
+.solarizedDarkColor .lds-ellipsis div {
+    background-color: #839496;
+}
 
 /* ======================================== */
 /* type 5: atomicDarkColor */
@@ -629,6 +691,18 @@ button.delete:hover {
     background-color: rgb(27 27 100);
 }
 
+.atomicDarkColor #selectWraper {
+    background-color: #1d1f21;
+    border: 1px solid #606b6e;
+}
+
+.atomicDarkColor #loading {
+    background-color: #1d1f21;
+}
+
+.atomicDarkColor .lds-ellipsis div {
+    background-color: #c5c8c6;
+}
 
 /* ======================================== */
 
