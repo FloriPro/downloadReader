@@ -1239,8 +1239,9 @@ window.onload = () => {
 /**
  * @type {controller}
  */
-let CONTROLLER;
+// sourcery skip: avoid-using-var
+var CONTROLLER;
 /**
  * @type {gui}
  */
-let GUI;
+var GUI;
