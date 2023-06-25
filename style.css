@@ -3,6 +3,7 @@ body {
     margin: 0;
     padding: 0;
     font-size: 15px;
+    height: 100%;
 }
 
 *[niceTitle]:hover::after {
@@ -48,7 +49,7 @@ body {
     width: 100%;
 }
 
-.pageTreeUl .downloadedPage{
+.pageTreeUl .downloadedPage {
     margin-left: 0px;
     margin-right: 0px;
     padding-left: 5px;
@@ -69,7 +70,7 @@ body {
     justify-content: flex-end;
 }
 
-.pageTreeWrapperClosed{
+.pageTreeWrapperClosed {
     display: none;
 }
 
@@ -190,7 +191,7 @@ button.delete:hover {
 
     width: 70%;
     height: 70%;
-    min-width: 500px;
+    min-width: 300px;
     min-height: 500px;
     max-width: 100%;
     max-height: 100%;
@@ -206,7 +207,12 @@ button.delete:hover {
 
     border: 1px solid #ccc;
 
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#editPanel hr {
+    width: 100%;
 }
 
 .editPanelList {
@@ -230,24 +236,34 @@ button.delete:hover {
     text-decoration: underline;
 }
 
-
 #pageOptions .selected {
     background-color: #f0f0f0;
     border: 1px solid #aaa;
     box-shadow: 0 0 5px #d8d8d8;
 }
 
+.displayTypeSelectContainer {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+    align-items: flex-start;
+}
+
+.displayTypeSelectContainer>p {
+    min-width: 57px !important;
+}
+
 .displayTypeSelectRow {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    margin-bottom: 20px;
 }
 
 
 #page {
     transition: all 0.3s ease-in-out;
     min-height: 100vh;
+    padding-bottom: 0.1px;
 }
 
 #pageOptions {
@@ -255,14 +271,15 @@ button.delete:hover {
     z-index: 998;
     bottom: 0;
     display: flex;
-    position: fixed;
     flex-direction: column;
-    width: 100%;
-    border-top: 1px solid #ccc;
-    padding-top: 20px;
+    width: calc(100% - 50px);
+    border: 1px solid #ccc;
+    padding: 20px;
     font-family: sans-serif;
     font-size: 15px;
     box-shadow: 0 0 30px #3d3d3d80;
+    margin: 5px;
+    border-radius: 14px;
 }
 
 
@@ -375,12 +392,21 @@ button.delete:hover {
     overflow: auto;
 }
 
+.type3container #pageContent {
+    overflow: auto;
+    padding: 20px;
+    margin: 10px;
+}
 
+
+
+
+/* ======================================== */
+/* type 1 */
 .type1color {
     color: #1e1d25;
     background-color: #fff;
 }
-
 
 .type1color button.selected {
     background-color: #d6d6d6 !important;
@@ -394,12 +420,31 @@ button.delete:hover {
     color: #1e1d25;
 }
 
+.type1color .downloadedPage {
+    background-color: #f2f2f2;
+    box-shadow: 0 0 10px #ccc;
+    color: black;
+}
 
+.type1color #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(0, 255, 0);
+}
+
+.type1color #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(255 89 0);
+}
+
+.type1color #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(0 171 255);
+}
+
+
+/* ======================================== */
+/* type 2 */
 .type2color {
     color: #fff;
     background-color: #000000;
 }
-
 
 .type2color button.selected {
     background-color: #d6d6d6 !important;
@@ -413,12 +458,30 @@ button.delete:hover {
     color: #fff;
 }
 
+.type2color .downloadedPage {
+    background-color: #1f1f1f;
+    box-shadow: 0 0 10px #5f5f5f;
+    color: white;
+}
 
+.type2color #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(0, 136, 0);
+}
+
+.type2color #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(163, 0, 0);
+}
+
+.type2color #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(0, 0, 163);
+}
+
+/* ======================================== */
+/* type 23 */
 .type23color {
     color: #9e9e9e;
     background-color: #000000;
 }
-
 
 .type23color button.selected {
     background-color: #d6d6d6 !important;
@@ -432,12 +495,31 @@ button.delete:hover {
     color: #9e9e9e;
 }
 
+.type23color .downloadedPage {
+    background-color: #000000;
+    box-shadow: 0 0 10px #2e2e2e;
+    color: #9e9e9e;
+}
 
+.type23color #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(0, 94, 0);
+}
+
+.type23color #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(119, 0, 0);
+}
+
+.type23color #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(0, 0, 119);
+}
+
+
+/* ======================================== */
+/* type 3 */
 .type3color {
     color: #fff;
     background-color: #5a5151;
 }
-
 
 .type3color button.selected {
     background-color: #d6d6d6 !important;
@@ -451,6 +533,104 @@ button.delete:hover {
     color: #fff;
 }
 
+.type3color .downloadedPage {
+    background-color: #6d6464;
+    box-shadow: 0 0 10px #3d3d3d80;
+    color: white;
+}
+
+.type3color #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(0, 191, 0);
+}
+
+.type3color #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(231 0 0);
+}
+
+.type3color #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(0, 0, 231);
+}
+
+
+/* ======================================== */
+/* type 4: solarizedDarkColor */
+.solarizedDarkColor {
+    color: #839496;
+    background-color: #002b36;
+}
+
+.solarizedDarkColor button.selected {
+    background-color: #07495a !important;
+    color: #e5e5e5;
+}
+
+.solarizedDarkColor .styleColorUpdate,
+.solarizedDarkColor button,
+.solarizedDarkColor button:hover,
+.solarizedDarkColor a {
+    background-color: #002b36;
+    color: #839496;
+}
+
+.solarizedDarkColor .downloadedPage {
+    background-color: #144d5b;
+    box-shadow: 0 0 10px #606b6e;
+    color: #839496;
+}
+
+.solarizedDarkColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.solarizedDarkColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.solarizedDarkColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+
+/* ======================================== */
+/* type 5: atomicDarkColor */
+.atomicDarkColor {
+    color: #c5c8c6;
+    background-color: #1d1f21;
+}
+
+.atomicDarkColor button.selected {
+    background-color: #2b2b2b !important;
+    color: #e5e5e5;
+}
+
+.atomicDarkColor .styleColorUpdate,
+.atomicDarkColor button,
+.atomicDarkColor button:hover,
+.atomicDarkColor a {
+    background-color: #1d1f21;
+    color: #c5c8c6;
+}
+
+.atomicDarkColor .downloadedPage {
+    background-color: #2b2b2b;
+    box-shadow: 0 0 10px #606b6e;
+    color: #c5c8c6;
+}
+
+.atomicDarkColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.atomicDarkColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.atomicDarkColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+
+/* ======================================== */
 
 
 
@@ -474,14 +654,22 @@ button.delete:hover {
     font-size: 15px;
 }
 
+.type12size {
+    font-size: 17px;
+}
+
 .type2size {
     font-size: 20px;
+}
+
+.type23size {
+    font-size: 22px;
 }
 
 .type3size {
     font-size: 25px;
 }
 
-#editPanel hr {
-    width: 100%;
+.type4size {
+    font-size: 30px;
 }

@@ -60,7 +60,7 @@
             <br>
             <button onclick="GUI.showTab('Home'); GUI.pageReader.toggleOptions();">Back</button>
         </div>
-        <p id="pageUrl" onclick="window.open(this.innerText)"></p>
+        <p id="pageUrl" onclick="window.open(this.innerText);event.stopPropagation();"></p>
         <div id="pageContent">
             <p id="pageContentTitle"></p>
             <div id="pageContentBody">

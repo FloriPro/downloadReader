@@ -41,12 +41,15 @@ class gui {
             Margin: {
                 "Type 1": "type1container",
                 "Type 2": "type2container",
+                "Type 3": "type3container",
             },
             Color: {
                 "Light": "type1color",
                 "Dark": "type2color",
                 "Dark Dark": "type23color",
                 "Mid Dark": "type3color",
+                "Solarized Dark": "solarizedDarkColor",
+                "Atomic Dark": "atomicDarkColor",
             },
             Font: {
                 "Serif": "type1font",
@@ -56,8 +59,11 @@ class gui {
             Size: {
                 "Extra Small": "type0size",
                 "Small": "type1size",
+                "Medium Small": "type12size",
                 "Medium": "type2size",
+                "Medium Large": "type23size",
                 "Large": "type3size",
+                "Extra Large": "type4size"
             }
         }
         this.pageDisplayTypesStandard = {
@@ -82,6 +88,7 @@ class gui {
                     "Dark": "#000000",
                     "Dark Dark": "#000000",
                     "Mid Dark": "#5a5151",
+                    "Solarized Dark": "#002b36",
                 }
                 meta.setAttribute("content", colors[type2]);
             }
@@ -309,11 +316,14 @@ class gui {
     addPageDisplayTypes() {
         var div = document.querySelector("#autoGenDisplayTypes");
         for (var t in this.pageDisplayTypes) {
-            var container = document.createElement('div');
-            var p = document.createElement('p');
+            let containerWrapper = document.createElement('div');
+            containerWrapper.classList.add('displayTypeSelectContainer');
+
+            let container = document.createElement('div');
+            let p = document.createElement('p');
             p.innerText = t + ':';
             p.style.margin = '0';
-            container.appendChild(p);
+            containerWrapper.appendChild(p);
             container.classList.add('displayTypeSelectRow');
 
             this.pageDisplayTypesSelected[t] = Object.values(this.pageDisplayTypes[t])[0];
@@ -328,7 +338,8 @@ class gui {
                 this.reversePageDisplayTypes[t][this.pageDisplayTypes[t][t2]] = t2;
             }
             this.setPageDisplayType(t, this.pageDisplayTypesStandard[t]);
-            div.appendChild(container);
+            containerWrapper.appendChild(container);
+            div.appendChild(containerWrapper);
         }
     }
 
@@ -342,8 +353,8 @@ class gui {
 
         this.pageDisplayTypesSelected[type] = this.pageDisplayTypes[type][type2];
         this.pageDisplayTypesDom[type].items[type2].classList.add('selected');
-        document.querySelector("#page").classList.remove(old);
-        document.querySelector("#page").classList.add(this.pageDisplayTypesSelected[type]);
+        document.querySelector("body").classList.remove(old);
+        document.querySelector("body").classList.add(this.pageDisplayTypesSelected[type]);
         if (this.specialTypeCode[type]) {
             this.specialTypeCode[type](type, type2);
         }
@@ -642,12 +653,20 @@ class massDownloadStuff {
     updateSelected() {
         for (var i = 0; i < this.links.length; i++) {
             if (this.selected[i] == "clicked") {
-                document.querySelector("#editPanelMassDownloadLinksList").children[i].style.backgroundColor = "blue";
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].classList.add("clicked");
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].classList.remove("selected");
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].classList.remove("notselected");
             }
             else if (this.selected[i]) {
-                document.querySelector("#editPanelMassDownloadLinksList").children[i].style.backgroundColor = "green";
+                //document.querySelector("#editPanelMassDownloadLinksList").children[i].style.backgroundColor = "green";
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].classList.remove("clicked");
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].classList.add("selected");
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].classList.remove("notselected");
             } else {
-                document.querySelector("#editPanelMassDownloadLinksList").children[i].style.backgroundColor = "red";
+                //document.querySelector("#editPanelMassDownloadLinksList").children[i].style.backgroundColor = "red";
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].classList.remove("clicked");
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].classList.remove("selected");
+                document.querySelector("#editPanelMassDownloadLinksList").children[i].classList.add("notselected");
             }
         }
     }
