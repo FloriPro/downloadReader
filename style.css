@@ -5,6 +5,17 @@ body {
     font-size: 15px;
 }
 
+*[niceTitle]:hover::after {
+    content: attr(niceTitle);
+    position: absolute;
+    background-color: #000;
+    color: #fff;
+    margin-left: 30px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    pointer-events: none;
+}
+
 .downloadedPage {
     background-color: #f2f2f2;
     padding: 20px;
@@ -30,6 +41,38 @@ body {
     font-weight: bold;
 }
 
+.pageTreeUl {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.pageTreeUl .downloadedPage{
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.pageTreeCloseBtn {
+    height: 30px;
+    width: 30px;
+    border-radius: 15px;
+    margin-right: 0px;
+}
+
+.pageTreeWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.pageTreeWrapperClosed{
+    display: none;
+}
+
 button {
     cursor: pointer;
     color: #000;
@@ -46,13 +89,13 @@ button:hover {
     box-shadow: 0 0 5px #d8d8d8;
 }
 
-button.delete{
+button.delete {
     background-color: #f00;
     color: #fff;
     border: 1px solid rgb(119, 0, 0);
 }
 
-button.delete:hover{
+button.delete:hover {
     background-color: #f00;
     color: #fff;
     border: 1px solid rgb(119, 0, 0);

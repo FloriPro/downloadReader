@@ -3,6 +3,7 @@ class gui {
         this.pageReader = new pageReader();
         this.loader = new loader();
         document.querySelector('#btnDownload').addEventListener('click', this.buttonAddUrl);
+        document.querySelector('#btnToggleUrlGroup').addEventListener('click', this.toggleUrlGroup.bind(this));
         this.updatePages();
 
         this.currentTab = "Home";
@@ -15,11 +16,25 @@ class gui {
             }
         };
         this.showTab(this.currentTab);
-
         this.currentPage = null;
-
         this.loadDisplayTypes();
     }
+
+    async toggleUrlGroup() {
+        let urlGroup = await CONTROLLER.database.getOption("pagedTree");
+        urlGroup = !urlGroup;
+        CONTROLLER.database.setOption("pagedTree", urlGroup);
+        this.updatePages();
+    }
+
+    setUrlGrupText(urlGroup) {
+        if (urlGroup) {
+            document.querySelector('#btnToggleUrlGroup').innerText = "Disable URL Group";
+        } else {
+            document.querySelector('#btnToggleUrlGroup').innerText = "Enable URL Group";
+        }
+    }
+
 
     async loadDisplayTypes() {
         this.pageDisplayTypes = {
@@ -79,46 +94,177 @@ class gui {
 
     buttonAddUrl() {
         var url = prompt('Enter URL', '');
-        if (!url) return;
+        if (!url) {
+            return;
+        }
         CONTROLLER.getPage(url);
     }
     async updatePages() {
-        var id = this.loader.add();
-        var p = await CONTROLLER.database.getPages();
-        var div = document.querySelector('#downloadedPages');
+        const id = this.loader.add();
+
+        let urlGroup = await CONTROLLER.database.getOption("pagedTree");
+        if (urlGroup == null) {
+            urlGroup = false;
+            CONTROLLER.database.setOption("pagedTree", urlGroup);
+        }
+        this.setUrlGrupText(urlGroup);
+        const p = await CONTROLLER.database.getPages();
+        const div = document.querySelector('#downloadedPages');
         div.innerHTML = '';
-        for (var i = 0; i < p.length; i++) {
-            div.appendChild(this.getPage(p[i].url));
+
+        if (!urlGroup) {
+            for (let i = 0; i < p.length; i++) {
+                div.appendChild(this.getPage(p[i].url));
+            }
+        }
+        else {
+            const t = this.loadPageTree(p);
+
+            let urlGroupClosed = await CONTROLLER.database.getOption("pagedTreeClosed");
+            if (urlGroupClosed == null) {
+                urlGroupClosed = this.resetUrlGroupClosed(t);
+                //urlGroupClosed = {};
+                CONTROLLER.database.setOption("pagedTreeClosed", urlGroupClosed);
+            }
+
+            for (var x of Object.keys(t)) {
+                let pt = this.displayPageTree(t[x]["me"], t[x]["children"], urlGroupClosed[x], x, urlGroupClosed);
+                div.appendChild(pt);
+            }
         }
         this.loader.remove(id);
     }
 
+    resetUrlGroupClosed(t) {
+        let urlGroupClosed = {};
+        for (var x of Object.keys(t)) {
+            urlGroupClosed[x] = {
+                "closed": false,
+                "children": this.resetUrlGroupClosed(t[x]["children"]),
+            }
+        }
+        return urlGroupClosed;
+    }
+
+    displayPageTree(me, children, urlGroupClosed, myurl, outerGroupClosed) {
+        let div = this.getPage(me.url);
+
+        let wrapper = document.createElement('div');
+        wrapper.classList.add("pageTreeWrapper");
+
+        let ul = document.createElement('ul');
+        ul.classList.add('pageTreeUl');
+
+        for (var x of Object.keys(children)) {
+            let li = this.displayPageTree(children[x]["me"], children[x]["children"], urlGroupClosed["children"][x], x, outerGroupClosed);
+            ul.appendChild(li);
+        }
+        wrapper.appendChild(ul);
+
+        if (Object.keys(children).length != 0) {
+            let closeBtn = document.createElement('button');
+            closeBtn.classList.add('pageTreeCloseBtn');
+            closeBtn.innerText = "X";
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                ul.classList.toggle('pageTreeWrapperClosed');
+                urlGroupClosed["closed"] = ul.classList.contains('pageTreeWrapperClosed');
+                CONTROLLER.database.setOption("pagedTreeClosed", outerGroupClosed);
+                if (ul.classList.contains('pageTreeWrapperClosed')) {
+                    closeBtn.innerText = ">";
+                } else {
+                    closeBtn.innerText = "X";
+                }
+            });
+            if (urlGroupClosed["closed"]) {
+                ul.classList.add('pageTreeWrapperClosed');
+                closeBtn.innerText = ">";
+            }
+            wrapper.appendChild(closeBtn);
+        }
+
+        div.appendChild(wrapper);
+        return div;
+    }
+
+    loadPageTree(p) {
+        let out = {};
+        let minLen = 1000000;
+
+        for (let i = 0; i < p.length; i++) {
+            let url = this.parseUrl(p[i].url);
+            let urlSplit = url.split('/');
+            let len = urlSplit.length;
+            if (len < minLen) {
+                minLen = len;
+            }
+        }
+
+        //only add pages with the minimum length
+        for (let i = 0; i < p.length; i++) {
+            let url = this.parseUrl(p[i].url);
+            let urlSplit = url.split('/');
+            let len = urlSplit.length;
+            if (len == minLen) {
+                //start url until min /
+                let startUrl = urlSplit.slice(0, len).join('/');
+                out[startUrl] = {
+                    me: p[i],
+                    children: {}
+                };
+
+                //get other urls that start with startUrl
+                let urls = [];
+                for (let j = 0; j < p.length; j++) {
+                    let url2 = this.parseUrl(p[j].url);
+                    if (url2.startsWith(startUrl) && url2 != startUrl) {
+                        urls.push(p[j]);
+                    }
+                }
+                out[startUrl]["children"] = this.loadPageTree(urls);
+            }
+        }
+        return out;
+    }
+
+    parseUrl(url) {
+        //https://www.example.com/path/to/page.html
+        //return www.example.com/path/to/page.html (remove http(s)://
+        let nu = url.replace(/(^\w+:|^)\/\//, '');
+        if (nu.endsWith('/')) {
+            nu = nu.slice(0, -1);
+        }
+        return nu;
+    }
+
     getPage(url) {
-        var div = document.createElement('div');
+        const div = document.createElement('div');
         div.classList.add('downloadedPage');
         div.onclick = this.pageClick.bind(this, url);
 
-        var pUrl = document.createElement('p');
+        const pUrl = document.createElement('p');
         pUrl.innerText = url;
         pUrl.style.overflowWrap = "anywhere";
         div.appendChild(pUrl);
 
-        var btn = document.createElement('button');
-        btn.classList.add('redownload');
-        btn.innerText = 'Redownload';
-        btn.onclick = this.redownloadPage.bind(this, url);
-        div.appendChild(btn);
+        const redownloadButton = document.createElement('button');
+        redownloadButton.classList.add('redownload');
+        redownloadButton.innerText = 'Redownload';
+        redownloadButton.onclick = this.redownloadPage.bind(this, url);
+        div.appendChild(redownloadButton);
 
-        var btn = document.createElement('button');
-        btn.classList.add('delete');
-        btn.innerText = 'Delete';
-        btn.onclick = this.deletePage.bind(this, url);
-        div.appendChild(btn);
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('delete');
+        deleteButton.innerText = 'Delete';
+        deleteButton.onclick = this.deletePage.bind(this, url);
+        div.appendChild(deleteButton);
 
         CONTROLLER.database.getPage(url).then(dbInfo => {
-            if (!dbInfo) return;
+            if (!dbInfo) {
+                return;
+            }
 
-            var pTitle = document.createElement('p');
+            let pTitle = document.createElement('p');
             pTitle.classList.add('title');
             pTitle.innerText = dbInfo.title;
             div.prepend(pTitle);
@@ -130,6 +276,7 @@ class gui {
         return div;
     }
     pageClick(url) {
+        event.stopPropagation();
         CONTROLLER.showPage(url);
     }
 
@@ -647,7 +794,9 @@ class api {
             .then(response => response.json())
             .then(data => callback(data)).catch(err => {
                 console.error(err);
-                if (error) error(err);
+                if (error) {
+                    error(err);
+                }
             });
     }
     /**
@@ -673,7 +822,9 @@ class api {
         }).then(response => response.json())
             .then(data => callback(data)).catch(err => {
                 console.error(err);
-                if (error) error(err);
+                if (error) {
+                    error(err);
+                }
             });
     }
     /**
@@ -845,7 +996,9 @@ class database {
     }
 
     async dbOpen() {
-        if (this.db) return;
+        if (this.db) {
+            return;
+        }
         await this.open();
     }
 
@@ -887,6 +1040,9 @@ class database {
             };
         });
         var event = await promise;
+        if (event.target.result == undefined) {
+            return null;
+        }
         return event.target.result.value;
     }
 
@@ -956,7 +1112,7 @@ class reader {
         div.innerHTML = content;
 
         //remove unwanted texts
-        if (options.removedTexts == undefined) options.removedTexts = [];
+        if (options.removedTexts == undefined) { options.removedTexts = []; }
         div.querySelectorAll("*").forEach((element) => {
             //only get text nodes
             var walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
@@ -972,7 +1128,7 @@ class reader {
         });
 
         //replace specific texts
-        if (options.replaceTexts == undefined) options.replaceTexts = [];
+        if (options.replaceTexts == undefined) { options.replaceTexts = []; }
         div.querySelectorAll("*").forEach((element) => {
             //only get text nodes
             var walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
@@ -990,7 +1146,9 @@ class reader {
         //change all links
         div.querySelectorAll("a").forEach((element) => {
             var ogLink = element.getAttribute("href");
-            if (!ogLink) return;
+            if (!ogLink) {
+                return;
+            }
 
             element.setAttribute("href", "javascript:CONTROLLER.pageClicked(`" + ogLink + "`)");
         });
@@ -1081,8 +1239,8 @@ window.onload = () => {
 /**
  * @type {controller}
  */
-var CONTROLLER;
+let CONTROLLER;
 /**
  * @type {gui}
  */
-var GUI;
+let GUI;
