@@ -89,6 +89,7 @@ class gui {
                     "Dark Dark": "#000000",
                     "Mid Dark": "#5a5151",
                     "Solarized Dark": "#002b36",
+                    "Atomic Dark": "1d1f21"
                 }
                 meta.setAttribute("content", colors[type2]);
             }
