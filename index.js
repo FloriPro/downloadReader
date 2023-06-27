@@ -4,6 +4,8 @@ class gui {
         this.loader = new loader();
         document.querySelector('#btnDownload').addEventListener('click', this.buttonAddUrl);
         document.querySelector('#btnToggleUrlGroup').addEventListener('click', this.toggleUrlGroup.bind(this));
+        this.minimalMode = false;
+        document.querySelector('#btnMinimalMode').addEventListener('click', this.toggleMinimalMode.bind(this));
         this.updatePages();
 
         this.currentTab = "Home";
@@ -18,6 +20,13 @@ class gui {
         this.showTab(this.currentTab);
         this.currentPage = null;
         this.loadDisplayTypes();
+    }
+
+    async toggleMinimalMode() {
+        this.minimalMode = await CONTROLLER.database.getOption("minimalMode");
+        this.minimalMode = !this.minimalMode;
+        CONTROLLER.database.setOption("minimalMode", this.minimalMode);
+        this.updatePages();
     }
 
     async toggleUrlGroup() {
@@ -107,6 +116,10 @@ class gui {
         CONTROLLER.getPage(url);
     }
     async updatePages() {
+        this.minimalMode = await CONTROLLER.database.getOption("minimalMode");
+        if (this.minimalMode == undefined || this.minimalMode == null) {
+            this.minimalMode = false;
+        }
         const id = this.loader.add();
 
         let urlGroup = await CONTROLLER.database.getOption("pagedTree");
@@ -244,7 +257,55 @@ class gui {
         return nu;
     }
 
+    getMinimalPage(url) {
+        let div = document.createElement('div');
+        div.classList.add('minimalDownloadedPage');
+
+        let infoWrapper = document.createElement('div');
+        infoWrapper.classList.add('minimalDownloadedPageInfoWrapper');
+        div.appendChild(infoWrapper);
+
+        let pName = document.createElement('p');
+        pName.classList.add('minimalDownloadedPageName');
+        pName.innerText = "Loading...";
+        pName.onclick = this.pageClick.bind(this, url);
+        CONTROLLER.database.getPage(url).then((page) => {
+            if (!page) {
+                return;
+            }
+            if (page.title == "") {
+                page.title = url;
+            }
+            pName.innerText = page.title;
+        });
+        infoWrapper.appendChild(pName);
+
+        let pUrl = document.createElement('p');
+        pUrl.classList.add('minimalDownloadedPageUrl');
+        pUrl.innerText = url;
+        infoWrapper.appendChild(pUrl);
+
+        let redownloadButton = document.createElement('button');
+        redownloadButton.classList.add('minimalRedownload');
+        redownloadButton.innerText = 'Redownload';
+        redownloadButton.onclick = this.redownloadPage.bind(this, url);
+        infoWrapper.appendChild(redownloadButton);
+
+        let deleteButton = document.createElement('button');
+        deleteButton.classList.add('minimalDelete');
+        deleteButton.innerText = 'Delete';
+        deleteButton.onclick = this.deletePage.bind(this, url);
+        infoWrapper.appendChild(deleteButton);
+
+        return div;
+    }
+
     getPage(url) {
+        //if minimal mode is on
+        if (this.minimalMode) {
+            return this.getMinimalPage(url);
+        }
+
         const div = document.createElement('div');
         div.classList.add('downloadedPage');
         div.onclick = this.pageClick.bind(this, url);
