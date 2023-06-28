@@ -43,6 +43,11 @@
     </div>
     <div id="home">
         <h1>Reader Downloader</h1>
+        <div id="addUrlDiv" style="display:none;">
+           <input id="addUrlUrl" placeholder="url" />
+           <button onclick="GUI.urlAddClick()">Ok</button>
+        </div>
+        
         <button id="btnDownload">Add Url</button>
         <button id="btnToggleUrlGroup" niceTitle="Only works when a url has a direct parent! Some URL's might not be visible">Toggle Url Group</button>
         <button id="btnMinimalMode">Minimal Mode</button>

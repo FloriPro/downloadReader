@@ -110,12 +110,23 @@ class gui {
     }
 
     buttonAddUrl() {
-        var url = prompt('Enter URL', '');
+        document.getElementById('addUrlDiv').style.display = "";
+        /*var url = prompt('Enter URL', '');
         if (!url) {
             return;
         }
+        CONTROLLER.getPage(url);*/
+    }
+
+    urlAddClick() {
+        var url = document.querySelector("#addUrlUrl").value;
+        if (url == "" || url == null) {
+            return;
+        }
+        document.getElementById('addUrlDiv').style.display = "none";
         CONTROLLER.getPage(url);
     }
+
     async updatePages() {
         this.minimalMode = await CONTROLLER.database.getOption("minimalMode");
         if (this.minimalMode == undefined || this.minimalMode == null) {
