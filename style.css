@@ -42,6 +42,11 @@ body {
     font-weight: bold;
 }
 
+.downloadedPage .chapterTitle{
+    font-size: 15px;
+    font-weight: bold;
+}
+
 .pageTreeUl {
     list-style: none;
     padding: 0;
@@ -434,6 +439,19 @@ button.delete:hover {
     padding-bottom: 20px;
 
 
+}
+
+.bookPageHelper{
+    background-color: #00000025;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+.bookPageHelper button{
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 /*

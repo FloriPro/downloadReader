@@ -19,6 +19,7 @@ class gui {
         };
         this.showTab(this.currentTab);
         this.currentPage = null;
+        this.pageDisplayTypes = null;
         this.loadDisplayTypes();
     }
 
@@ -153,9 +154,14 @@ class gui {
             const t = this.loadPageTree(p);
 
             let urlGroupClosed = await CONTROLLER.database.getOption("pagedTreeClosed");
+
+            div.innerHTML = '';//clear div because the function before can take some time (fails with multiple simultaneous downloads)
+
             if (urlGroupClosed == null) {
                 urlGroupClosed = this.resetUrlGroupClosed(t);
-                //urlGroupClosed = {};
+                CONTROLLER.database.setOption("pagedTreeClosed", urlGroupClosed);
+            } else {
+                urlGroupClosed = this.updateUrlGroupeClosed(t, urlGroupClosed);
                 CONTROLLER.database.setOption("pagedTreeClosed", urlGroupClosed);
             }
 
@@ -164,7 +170,193 @@ class gui {
                 div.appendChild(pt);
             }
         }
+
+        //load Books
+        const bookDiv = document.querySelector('#downloadedBooks');
+        const books = await CONTROLLER.database.getBooks();
+        bookDiv.innerHTML = '';
+        let urlGroupClosed = await CONTROLLER.database.getOption("pagedBookTreeClosed");
+        if (urlGroupClosed == null) {
+            console.warn("pagedBookTreeClosed not found, resetting");
+            urlGroupClosed = {};
+            for (let i = 0; i < books.length; i++) {
+                urlGroupClosed[books[i].bookId] = true;
+            }
+            CONTROLLER.database.setOption("pagedBookTreeClosed", urlGroupClosed);
+        }
+        bookDiv.innerHTML = '';
+        for (let i = 0; i < books.length; i++) {
+            bookDiv.appendChild(this.getBook(books[i], urlGroupClosed));
+        }
+
         this.loader.remove(id);
+
+        window.scrollTo(0, 0);
+    }
+
+
+    switcher(condition, onTrue, onFalse) {
+        if (condition) {
+            return onTrue;
+        }
+        return onFalse;
+    }
+
+    getChapter(book, chapter) {
+        let div = document.createElement('div');
+        let divTop = div;
+        div.classList.add('chapter');
+        div.classList.add(this.switcher(this.minimalMode, "minimalDownloadedPage", "downloadedPage"));
+        div.onclick = (event) => {
+            window.scrollTo(0, 0);
+            event.stopPropagation();
+            CONTROLLER.showBook(book.bookId, chapter.chapterId);
+        }
+
+        if (this.minimalMode) {
+            div = document.createElement('div');
+            div.classList.add("minimalDownloadedPageInfoWrapper");
+            divTop.appendChild(div);
+        }
+
+        const title = document.createElement('p');
+        title.classList.add(this.switcher(this.minimalMode, "minimalDownloadedPageName", 'chapterTitle'));
+        title.innerText = chapter.title;
+        div.appendChild(title);
+
+        const pUrl = document.createElement('p');
+        pUrl.innerText = chapter.url;
+        pUrl.style.fontSize = "0.8em";
+        pUrl.style.overflowWrap = "anywhere";
+        if (this.minimalMode) {
+            pUrl.classList.add("minimalDownloadedPageUrl");
+        }
+        div.appendChild(pUrl);
+
+        const redownloadButton = document.createElement('button');
+        redownloadButton.classList.add(this.switcher(this.minimalMode, "minimalRedownload", 'bookRedownloadButton'));
+        redownloadButton.innerText = "Redownload";
+        redownloadButton.onclick = (event) => {
+            event.stopPropagation();
+            CONTROLLER.getPage(chapter.url);
+        }
+        div.appendChild(redownloadButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add(this.switcher(this.minimalMode, "minimalDelete", 'bookDeleteButton'));
+        deleteButton.innerText = "Delete";
+        deleteButton.onclick = (event) => {
+            event.stopPropagation();
+            CONTROLLER.database.deleteChapter(book.bookId, chapter.chapterId);
+            this.updatePages();
+        }
+        div.appendChild(deleteButton);
+
+        return divTop;
+    }
+
+    getBook(book, urlGroupClosed) {
+        let div = document.createElement('div');
+        var divTop = div;
+        div.classList.add('book');
+        div.classList.add(this.switcher(this.minimalMode, "minimalDownloadedPage", "downloadedPage"));
+        div.onclick = (event) => {
+            window.scrollTo(0, 0);
+            event.stopPropagation();
+            CONTROLLER.showBook(book.bookId);
+        }
+
+        if (this.minimalMode) {
+            div = document.createElement('div');
+            div.classList.add("minimalDownloadedPageInfoWrapper");
+            divTop.appendChild(div);
+        }
+
+        const title = document.createElement('p');
+        title.classList.add(this.switcher(this.minimalMode, "minimalDownloadedPageName", 'title'));
+        title.innerText = book.name;
+        div.appendChild(title);
+
+        //Tree View
+        let wrapper = document.createElement('div');
+        wrapper.classList.add("pageTreeWrapper");
+        let ul = document.createElement('ul');
+        ul.classList.add('pageTreeUl');
+        wrapper.appendChild(ul);
+
+        const pages = document.createElement('div');
+        pages.classList.add(this.switcher(this.minimalMode, "minimalDownloadedPageUrl", 'bookPages'));
+        pages.innerText = "... page(s)";
+        CONTROLLER.database.getChapters(book.bookId).then((chapters) => {
+            pages.innerText = chapters.length + " page(s)";
+
+            for (let i = 0; i < chapters.length; i++) {
+                let li = this.getChapter(book, chapters[i]);
+                ul.appendChild(li);
+            }
+            if (chapters.length != 0) {
+                let closeBtn = document.createElement('button');
+                closeBtn.classList.add('pageTreeCloseBtn');
+                closeBtn.innerText = "X";
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    ul.classList.toggle('pageTreeWrapperClosed');
+                    urlGroupClosed[book.bookId] = ul.classList.contains('pageTreeWrapperClosed');
+                    CONTROLLER.database.setOption("pagedBookTreeClosed", urlGroupClosed);
+                    if (ul.classList.contains('pageTreeWrapperClosed')) {
+                        closeBtn.innerText = ">";
+                    } else {
+                        closeBtn.innerText = "X";
+                    }
+                });
+
+                if (urlGroupClosed[book.bookId]) {
+                    ul.classList.add('pageTreeWrapperClosed');
+                    closeBtn.innerText = ">";
+                }
+                wrapper.appendChild(closeBtn);
+            }
+        });
+        div.appendChild(pages);
+
+        const navigationButton = document.createElement('button');
+        navigationButton.classList.add('bookNavigationButton');
+        navigationButton.innerText = "Chapters";
+        navigationButton.onclick = (event) => {
+            event.stopPropagation();
+            CONTROLLER.showBookChapters(book.bookId);
+        }
+        div.appendChild(navigationButton);
+
+        const redownloadButton = document.createElement('button');
+        redownloadButton.classList.add(this.switcher(this.minimalMode, "minimalRedownload", 'bookRedownloadButton'));
+        redownloadButton.classList.add('redownload');
+        redownloadButton.innerText = "Redownload";
+        redownloadButton.onclick = (event) => {
+            event.stopPropagation();
+            CONTROLLER.getPage(book.url)
+        }
+        div.appendChild(redownloadButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add(this.switcher(this.minimalMode, "minimalDelete", 'bookDeleteButton'));
+        deleteButton.classList.add('delete');
+        deleteButton.innerText = "Delete";
+        deleteButton.onclick = (event) => {
+            if (!confirm("Are you sure you want to delete this book?")) {
+                return;
+            }
+            event.stopPropagation();
+            CONTROLLER.database.deleteBook(book.bookId).then(() => {
+                this.updatePages();
+            });
+        }
+        div.appendChild(deleteButton);
+
+        div.appendChild(wrapper);
+
+
+        return divTop;
     }
 
     resetUrlGroupClosed(t) {
@@ -174,6 +366,20 @@ class gui {
                 "closed": false,
                 "children": this.resetUrlGroupClosed(t[x]["children"]),
             }
+        }
+        return urlGroupClosed;
+    }
+
+    //add new url to urlGroupClosed and return it
+    updateUrlGroupeClosed(t, urlGroupClosed) {
+        for (var x of Object.keys(t)) {
+            if (urlGroupClosed[x] == undefined) {
+                urlGroupClosed[x] = {
+                    "closed": false,
+                    "children": this.resetUrlGroupClosed(t[x]["children"]),
+                }
+            }
+            urlGroupClosed[x]["children"] = this.updateUrlGroupeClosed(t[x]["children"], urlGroupClosed[x]["children"]);
         }
         return urlGroupClosed;
     }
@@ -266,6 +472,10 @@ class gui {
         if (nu.endsWith('/')) {
             nu = nu.slice(0, -1);
         }
+        //remove after ?
+        if (nu.includes('?')) {
+            nu = nu.split('?')[0];
+        }
         return nu;
     }
 
@@ -356,6 +566,7 @@ class gui {
         return div;
     }
     pageClick(url) {
+        window.scrollTo(0, 0);
         event.stopPropagation();
         CONTROLLER.showPage(url);
     }
@@ -383,6 +594,7 @@ class gui {
 
         if (tab != "Page") {
             this.currentPage = null;
+            this.currentPageType = null;
         }
     }
 
@@ -440,12 +652,36 @@ class gui {
     }
 
     showPage(url, content, title, options) {
+        window.scrollTo(0, 0);
         this.showTab("Page");
+        document.querySelector("#bookOptions").style.display = "none";
+        document.querySelector('#bookHeader').style.display = "none";
+        document.querySelector('#bookFooter').style.display = "none";
+
         document.querySelector('#pageUrl').innerText = url;
         document.querySelector('#pageContentBody').innerHTML = CONTROLLER.reader.applyOptions(content, options);
         document.querySelector('#pageContentTitle').innerText = title;
 
         this.currentPage = url;
+        this.currentPageType = "page";
+    }
+
+    showBook(url, content, title, options, bookId, chapterId) {
+        this.showPage(url, content, title, options);
+        document.querySelector("#bookOptions").style.display = "";
+        if (chapterId != null) {
+            document.querySelector("#bookOptionViewBook").style.display = "none";
+            document.querySelector("#bookOptionViewChapters").style.display = "";
+            document.querySelector('#bookHeader').style.display = "";
+            document.querySelector('#bookFooter').style.display = "";
+        }else{
+            document.querySelector("#bookOptionViewBook").style.display = "";
+            document.querySelector("#bookOptionViewChapters").style.display = "none";
+        }
+
+        this.currentChapterId = chapterId;
+        this.currentBookId = bookId;
+        this.currentPageType = "book";
     }
 
     openSelect(data) {
@@ -592,7 +828,15 @@ class pageReader {
     }
 
     async makeEditPanel() {
-        var data = await CONTROLLER.database.getPage(GUI.currentPage);
+        if (GUI.currentPageType == "book") {
+            if (GUI.currentChapterId == null) {
+                var data = await CONTROLLER.database.getBook(GUI.currentBookId);
+            } else {
+                var data = await CONTROLLER.database.getChapter(GUI.currentBookId, GUI.currentChapterId);
+            }
+        } else {
+            var data = await CONTROLLER.database.getPage(GUI.currentPage);
+        }
 
         this.removedTexts = [];
         if (data.options.removedTexts) {
@@ -623,21 +867,47 @@ class pageReader {
         }
     }
 
+    setPageOption(option, value) {
+        if (GUI.currentPageType == "book") {
+            if (GUI.currentChapterId == null) {
+                var p = new Promise((resolve, reject) => {
+                    CONTROLLER.database.setBookOption(GUI.currentBookId, option, value).then(() => {
+                        GUI.pageReader.makeEditPanel();
+                        resolve();
+                    });
+                });
+                return p;
+            } else {
+                var p = new Promise((resolve, reject) => {
+                    CONTROLLER.database.setChapterOption(GUI.currentBookId, GUI.currentChapterId, option, value).then(() => {
+                        GUI.pageReader.makeEditPanel();
+                        resolve();
+                    });
+                });
+                return p;
+            }
+        } else {
+            var p = new Promise((resolve, reject) => {
+                CONTROLLER.database.setPageOption(GUI.currentPage, option, value).then(() => {
+                    GUI.pageReader.makeEditPanel();
+                    resolve();
+                });
+            });
+            return p;
+        }
+    }
+
     addRemoveText() {
         var text = document.querySelector('#editPanelRemoveTextsInput').value;
         if (text && text != "" && text != " ") {
             this.removedTexts.push(text);
-            CONTROLLER.database.setPageOption(GUI.currentPage, "removedTexts", this.removedTexts).then(() => {
-                GUI.pageReader.makeEditPanel();
-            });
+            this.setPageOption("removedTexts", this.removedTexts);
         }
         document.querySelector('#editPanelRemoveTextsInput').value = "";
     }
     removeRemoveText(text) {
         this.removedTexts.splice(this.removedTexts.indexOf(text), 1);
-        CONTROLLER.database.setPageOption(GUI.currentPage, "removedTexts", this.removedTexts).then(() => {
-            GUI.pageReader.makeEditPanel();
-        });
+        this.setPageOption("removedTexts", this.removedTexts);
     }
 
     addReplaceText() {
@@ -645,9 +915,7 @@ class pageReader {
         var text2 = document.querySelector('#editPanelReplaceTextsInput2').value;
         if (text && text != "" && text != " " && text2 && text2 != "" && text2 != " ") {
             this.replaceTexts.push({ from: text, to: text2 });
-            CONTROLLER.database.setPageOption(GUI.currentPage, "replaceTexts", this.replaceTexts).then(() => {
-                GUI.pageReader.makeEditPanel();
-            });
+            this.setPageOption("replaceTexts", this.replaceTexts);
         }
         document.querySelector('#editPanelReplaceTextsInput').value = "";
         document.querySelector('#editPanelReplaceTextsInput2').value = "";
@@ -655,9 +923,7 @@ class pageReader {
 
     removeEditText(text) {
         this.replaceTexts.splice(this.replaceTexts.indexOf(text), 1);
-        CONTROLLER.database.setPageOption(GUI.currentPage, "replaceTexts", this.replaceTexts).then(() => {
-            GUI.pageReader.makeEditPanel();
-        });
+        this.setPageOption("replaceTexts", this.replaceTexts);
     }
 
     async loadMassDownloadLinks() {
@@ -667,7 +933,15 @@ class pageReader {
 
         document.querySelector("#editPanelMassDownloadLinksList").style.display = "";
         document.querySelector("#editPanelMassDownloadLinksList").innerHTML = "";
-        var data = await CONTROLLER.database.getPage(GUI.currentPage);
+        if (GUI.currentPageType == "book") {
+            if (GUI.currentChapterId == null) {
+                var data = await CONTROLLER.database.getBook(GUI.currentBookId);
+            } else {
+                var data = await CONTROLLER.database.getChapter(GUI.currentBookId, GUI.currentChapterId);
+            }
+        } else {
+            var data = await CONTROLLER.database.getPage(GUI.currentPage);
+        }
 
         var htmdiv = document.createElement("div");
         htmdiv.innerHTML = data.content;
@@ -939,11 +1213,14 @@ class api {
 
 class database {
     constructor() {
+        /**
+         * @type {IDBDatabase}
+         */
         this.db = null;
     }
     async open() {
         var promise = new Promise((resolve, reject) => {
-            var request = window.indexedDB.open("reader", 1);
+            var request = window.indexedDB.open("reader", 2);
             request.onerror = function (event) {
                 reject(event);
             };
@@ -951,21 +1228,53 @@ class database {
                 resolve(event);
             };
             request.onupgradeneeded = function (event) {
+                /**
+                 * @type {IDBDatabase}
+                 */
                 var db = event.target.result;
-                var objectStore = db.createObjectStore("pages", {
-                    keyPath: "url"
-                });
-                objectStore.createIndex("url", "url", {
-                    unique: true
-                });
+
+                //pages table
+                if (!db.objectStoreNames.contains("pages")) {
+                    var objectStore = db.createObjectStore("pages", {
+                        keyPath: "url"
+                    });
+                    objectStore.createIndex("url", "url", {
+                        unique: true
+                    });
+                }
 
                 //options table
-                var objectStore = db.createObjectStore("options", {
-                    keyPath: "name"
-                });
-                objectStore.createIndex("name", "name", {
-                    unique: true
-                });
+                if (!db.objectStoreNames.contains("options")) {
+                    var objectStore = db.createObjectStore("options", {
+                        keyPath: "name"
+                    });
+                    objectStore.createIndex("name", "name", {
+                        unique: true
+                    });
+                }
+
+                //books table
+                if (!db.objectStoreNames.contains("books")) {
+                    var objectStore = db.createObjectStore("books", {
+                        keyPath: "bookId",
+                    });
+                    objectStore.createIndex("bookId", "bookId", {
+                        unique: true
+                    });
+                }
+
+                //chapters table: bookid, chapterid
+                if (!db.objectStoreNames.contains("chapters")) {
+                    var objectStore = db.createObjectStore("chapters", {
+                        keyPath: ["bookId", "chapterId"]
+                    });
+                    objectStore.createIndex("bookId", "bookId", {
+                        unique: false
+                    });
+                    objectStore.createIndex("chapterId", "chapterId", {
+                        unique: false
+                    });
+                }
             };
         });
         var event = await promise;
@@ -1004,12 +1313,6 @@ class database {
 
         var promise = new Promise((resolve, reject) => {
             var transaction = this.db.transaction(["pages"], "readwrite");
-            transaction.oncomplete = function (event) {
-                resolve(event);
-            };
-            transaction.onerror = function (event) {
-                reject(event);
-            };
 
             var objectStore = transaction.objectStore("pages");
             var request = objectStore.get(url);
@@ -1031,6 +1334,37 @@ class database {
         });
         var event = await promise;
         return event;
+    }
+
+    async setBookOption(bookId, name, value) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["books"], "readwrite");
+
+            var objectStore = transaction.objectStore("books");
+            var request = objectStore.get(bookId);
+            request.onerror = function (event) {
+                reject(event);
+            };
+
+            request.onsuccess = function (event) {
+                var page = event.target.result;
+                page.options[name] = value;
+                var requestUpdate = objectStore.put(page);
+                requestUpdate.onerror = function (event) {
+                    reject(event);
+                };
+                requestUpdate.onsuccess = function (event) {
+                    resolve(event);
+                };
+            };
+        });
+        var event = await promise;
+        return event;
+    }
+
+    async setChapterOption(bookId, chapterId, name, value) {
     }
 
     async getPage(url) {
@@ -1169,6 +1503,237 @@ class database {
             };
         });
     }
+
+    async bookExists(bookId) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["books"]);
+            var objectStore = transaction.objectStore("books");
+            var request = objectStore.get(bookId);
+            request.onerror = function (event) {
+                reject(event);
+            };
+            request.onsuccess = function (event) {
+                resolve(event);
+            };
+        });
+        var event = await promise;
+        return event.target.result != undefined;
+    }
+
+    async getBook(bookId) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["books"]);
+            var objectStore = transaction.objectStore("books");
+            var request = objectStore.get(bookId);
+            request.onerror = function (event) {
+                reject(event);
+            };
+            request.onsuccess = function (event) {
+                resolve(event);
+            };
+        });
+        var event = await promise;
+        return event.target.result;
+    }
+
+    async getBooks() {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["books"]);
+            var objectStore = transaction.objectStore("books");
+            //only get bookId, chapterId and name, not the content
+            var request = objectStore.getAll();
+            request.onerror = function (event) {
+                reject(event);
+            }
+            request.onsuccess = function (event) {
+                resolve(event);
+            }
+        });
+        var event = await promise;
+        return event.target.result;
+    }
+
+    async deleteBook(bookId) {
+        //delete the book and all chapters
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["books"], "readwrite");
+            transaction.oncomplete = function (event) {
+                resolve(event);
+            };
+            transaction.onerror = function (event) {
+                reject(event);
+            };
+            var objectStore = transaction.objectStore("books");
+            var request = objectStore.delete(bookId);
+        });
+        var event = await promise;
+
+        var chapters = await this.getChapters(bookId);
+        for (var i = 0; i < chapters.length; i++) {
+            await this.deleteChapter(bookId, chapters[i].chapterId);
+        }
+        return event;
+    }
+
+    async deleteChapter(bookId, chapterId) {
+        //delete the chapter
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["chapters"], "readwrite");
+            transaction.oncomplete = function (event) {
+                resolve(event);
+            };
+            transaction.onerror = function (event) {
+                reject(event);
+            };
+            var objectStore = transaction.objectStore("chapters");
+            var request = objectStore.delete([bookId, chapterId]);
+        });
+        var event = await promise;
+        return event;
+    }
+
+    async setBook(bookId, name, content, url, lastChapter = null, options = {}) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["books"], "readwrite");
+            transaction.oncomplete = function (event) {
+                resolve(event);
+            };
+            transaction.onerror = function (event) {
+                reject(event);
+            };
+            var objectStore = transaction.objectStore("books");
+            var request = objectStore.put({
+                bookId: bookId,
+                name: name,
+                content: content,
+                url: url,
+                lastChapter: lastChapter,
+                options: options,
+                date: new Date()
+            });
+        });
+        var event = await promise;
+        return event;
+    }
+
+    async addChapter(bookId, chapterId, content, title, url) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["chapters"], "readwrite");
+            transaction.oncomplete = function (event) {
+                resolve(event);
+            };
+            transaction.onerror = function (event) {
+                reject(event);
+            };
+            var objectStore = transaction.objectStore("chapters");
+            var request = objectStore.put({
+                bookId: bookId,
+                chapterId: chapterId,
+                content: content,
+                title: title,
+                url: url,
+                date: new Date(),
+                options: {}
+            });
+        });
+        var event = await promise;
+        return event;
+    }
+
+    async getChapter(bookId, chapterId) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["chapters"]);
+            var objectStore = transaction.objectStore("chapters");
+            var request = objectStore.get([bookId, chapterId]);
+            request.onerror = function (event) {
+                reject(event);
+            };
+            request.onsuccess = function (event) {
+                resolve(event);
+            };
+        });
+        var event = await promise;
+        return event.target.result;
+    }
+
+    async getChapters(bookId) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["chapters"]);
+            var objectStore = transaction.objectStore("chapters");
+            var request = objectStore.getAll();
+            request.onerror = function (event) {
+                reject(event);
+            }
+            request.onsuccess = function (event) {
+                resolve(event);
+            }
+        });
+        var event = await promise;
+        return event.target.result.filter((chapter) => chapter.bookId == bookId);
+    }
+
+    async getChapterFromUrl(url) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["chapters"]);
+            var objectStore = transaction.objectStore("chapters");
+            var request = objectStore.getAll();
+            request.onerror = function (event) {
+                reject(event);
+            }
+            request.onsuccess = function (event) {
+                resolve(event);
+            }
+        });
+        var event = await promise;
+        var chapters = event.target.result;
+        for (var i = 0; i < chapters.length; i++) {
+            if (chapters[i].url == url) {
+                return chapters[i];
+            }
+        }
+        return null;
+    }
+
+    async getBookChapterIdFromUrl(bookId, url) {
+        var chapters = await this.getChapters(bookId);
+        for (var i = 0; i < chapters.length; i++) {
+            if (chapters[i].url == url) {
+                return chapters[i].chapterId;
+            }
+        }
+        return null;
+    }
+
+    sortByChapterId(chapters) {
+        return chapters.sort((a, b) => a.chapterId - b.chapterId);
+    }
+    chapterIdMap(chapters) {
+        var map = {};
+        for (var i = 0; i < chapters.length; i++) {
+            map[chapters[i].chapterId] = chapters[i];
+        }
+        return map;
+    }
 }
 
 
@@ -1247,6 +1812,39 @@ class reader {
 
         return div.innerHTML;
     }
+
+    /**
+     * @returns {[boolean, string, string, string, {[key:string ]: string}]} [isBook, type: chapter|book, bookid, chapter, {options}]
+     */
+    checkForBook(htmlText, url) {
+        //check if page has meta tag with "downloadreaderbook"="<bookid>"
+        var dom = (new DOMParser()).parseFromString(htmlText, "text/html")
+        var meta = dom.querySelector("meta[name='downloadReaderBook']");
+        if (!meta) {
+            return [false, null, null, null, {}];
+        }
+
+        var options = {};
+
+        var bookid = meta.getAttribute("content");
+        var type = "book" // or chapter
+
+        var chapter = null;
+        var metaChapter = dom.querySelector("meta[name='downloadReaderChapter']");
+        if (metaChapter) {
+            type = "chapter";
+            chapter = metaChapter.getAttribute("content");
+        }
+
+        var metaName = dom.querySelector("meta[name='downloadReaderName']");
+        if (metaName) {
+            options.name = metaName.getAttribute("content");
+        } else {
+            options.name = dom.querySelector("title").textContent;
+        }
+
+        return [true, type, bookid, chapter, options];
+    }
 }
 
 class controller {
@@ -1269,10 +1867,28 @@ class controller {
             GUI.loader.remove(id);
             return;
         }
+        var isBook = this.reader.checkForBook(p.content, p.url);
         var reader = await this.reader.convertToReader(p.content, p.url);
-        await this.database.addPage(reader.url, reader.content, reader.title);
+
+        if (isBook[0]) {
+            var [isbook, type, bookid, chapter, options] = isBook;
+            //check if book allready exists
+            var book = await this.database.bookExists(bookid);
+            if (type == "book" || !book) {
+                this.database.setBook(bookid, options.name, reader.content, reader.url);
+                book = await this.database.getBook(bookid);
+            }
+            if (type == "chapter") {
+                this.database.addChapter(bookid, chapter, reader.content, reader.title, reader.url);
+            }
+        } else {
+            await this.database.addPage(reader.url, reader.content, reader.title);
+        }
+
         GUI.updatePages();
         GUI.loader.remove(id);
+
+        return isBook;
     }
     async showPage(url) {
         var id = GUI.loader.add("Loading page " + url);
@@ -1286,16 +1902,137 @@ class controller {
         GUI.loader.remove(id);
     }
 
-    async reloadPage() {
-        var id = GUI.loader.add("Reloading page");
-        var page = await this.database.getPage(GUI.currentPage);
-        GUI.showPage(page.url, page.content, page.title, page.options);
+    async showBook(bookid, chapterid = null) {
+        var id = GUI.loader.add("Loading book " + bookid);
+        var book = await this.database.getBook(bookid);
+        if (!book) {
+            alert('Error');
+            GUI.loader.remove(id);
+            return;
+        }
+        //check if book has chapters
+        var chapters = await this.database.getChapters(bookid);
+        if (chapters.length > 0) {
+            //show latest chapter
+            if (book.lastChapter == null || chapterid != null) {
+                if (chapterid == null) {
+                    chapters = this.database.sortByChapterId(chapters);
+                    book.lastChapter = chapters[0].chapterId;
+                } else {
+                    book.lastChapter = chapterid;
+                }
+                this.database.setBook(bookid, book.name, book.content, book.url, book.lastChapter);
+            }
+            var chapter = await this.database.getChapter(bookid, book.lastChapter);
+            GUI.showBook(chapter.url, chapter.content, chapter.title, book.options, bookid, chapter.chapterId);
+        } else {
+            this.showBookChapters(bookid);
+        }
+
+        GUI.loader.remove(id);
+    }
+    async nextChapter() {
+        var id = GUI.loader.add("Loading next chapter");
+        var book = await this.database.getBook(GUI.currentBookId);
+        if (!book) {
+            alert('Error');
+            GUI.loader.remove(id);
+            return;
+        }
+        var chapters = await this.database.getChapters(book.bookId);
+        chapters = this.database.sortByChapterId(chapters);
+        var nextChapter = null;
+        for (var i = 0; i < chapters.length; i++) {
+            if (chapters[i].chapterId == book.lastChapter) {
+                if (i + 1 < chapters.length) {
+                    nextChapter = chapters[i + 1];
+                }
+                break;
+            }
+        }
+        if (!nextChapter) {
+            alert("No next chapter");
+            GUI.loader.remove(id);
+            return;
+        }
+        book.lastChapter = nextChapter.chapterId;
+        this.database.setBook(book.bookId, book.name, book.content, book.url, book.lastChapter);
+        GUI.showBook(nextChapter.url, nextChapter.content, nextChapter.title, book.options, book.bookId, nextChapter.chapterId);
+        GUI.loader.remove(id);
+    }
+    async beforeChapter() {
+        var id = GUI.loader.add("Loading next chapter");
+        var book = await CONTROLLER.database.getBook(GUI.currentBookId);
+        if (!book) {
+            alert('Error');
+            GUI.loader.remove(id);
+            return;
+        }
+        var chapters = await CONTROLLER.database.getChapters(book.bookId);
+        chapters = CONTROLLER.database.sortByChapterId(chapters);
+        var nextChapter = null;
+        for (var i = 0; i < chapters.length; i++) {
+            if (chapters[i].chapterId == book.lastChapter) {
+                if (i - 1 >= 0) {
+                    nextChapter = chapters[i - 1];
+                }
+                break;
+            }
+        }
+
+        if (!nextChapter) {
+            alert("No chapter before");
+            GUI.loader.remove(id);
+            return;
+        }
+        book.lastChapter = nextChapter.chapterId;
+        CONTROLLER.database.setBook(book.bookId, book.name, book.content, book.url, book.lastChapter);
+        GUI.showBook(nextChapter.url, nextChapter.content, nextChapter.title, book.options, book.bookId, nextChapter.chapterId);
+
         GUI.loader.remove(id);
     }
 
-    pageClicked(url) {
+
+    async showBookChapters(bookid) {
+        var id = GUI.loader.add("Loading book " + bookid);
+        var book = await this.database.getBook(bookid);
+        if (!book) {
+            alert('Error');
+            GUI.loader.remove(id);
+            return;
+        }
+
+        GUI.showBook(book.url, book.content, book.name, book.options, bookid, null);
+        GUI.loader.remove(id);
+    }
+
+
+    async reloadPage() {
+        var id = GUI.loader.add("Reloading page");
+
+        if (GUI.currentPageType == "book") {
+            if (GUI.currentChapterId) {
+                this.showBook(GUI.currentBookId);
+            } else {
+                this.showBookChapters(GUI.currentBookId);
+            }
+        } else {
+            var page = await this.database.getPage(GUI.currentPage);
+            GUI.showPage(page.url, page.content, page.title, page.options);
+        }
+        GUI.loader.remove(id);
+    }
+
+    async pageClicked(url) {
         GUI.pageReader.optionsOpen = false;
         GUI.pageReader.updateOptions();
+        if (GUI.currentPageType == "book") {
+            var chapterId = await this.database.getBookChapterIdFromUrl(GUI.currentBookId, url);
+            if (chapterId != null) {
+                this.showBook(GUI.currentBookId, chapterId);
+                return;
+            }
+        }
         GUI.openSelect({
             title: "Clicked link (" + url + ")",
             options: [
@@ -1314,7 +2051,16 @@ class controller {
                 {
                     text: "Download and open page",
                     action: async () => {
-                        await CONTROLLER.getPage(url);
+                        var isBook = await CONTROLLER.getPage(url);
+                        //[isBook, type: chapter|book, bookid, chapter, {options}]
+                        if (isBook[0]) {
+                            if (isBook[1] == "chapter") {
+                                CONTROLLER.showBook(isBook[2], isBook[3]);
+                                return;
+                            }
+                            CONTROLLER.showBook(isBook[2]);
+                            return;
+                        }
                         CONTROLLER.showPage(url);
                     }
                 }

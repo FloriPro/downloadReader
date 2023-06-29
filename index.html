@@ -30,7 +30,7 @@
 </head>
 
 <body>
-    <div id="loading" style="display: none;">
+    <div id="loading">
         <div class="lds-ellipsis">
             <div></div>
             <div></div>
@@ -53,7 +53,7 @@
             niceTitle="Only works when a url has a direct parent! Some URL's might not be visible">Toggle Url
             Group</button>
         <button id="btnMinimalMode">Minimal Mode</button>
-        <div id="reader"></div>
+        <div id="downloadedBooks"></div>
         <div id="downloadedPages">
         </div>
         <hr>
@@ -64,16 +64,31 @@
     </div>
     <div id="page" class="">
         <div id="pageOptions" class="styleColorUpdate">
+            <div id="bookOptions">
+                <button onclick="CONTROLLER.showBook(GUI.currentBookId);GUI.pageReader.toggleOptions();"
+                    id="bookOptionViewBook">Book</button>
+                <button onclick="CONTROLLER.showBookChapters(GUI.currentBookId);GUI.pageReader.toggleOptions();"
+                    id="bookOptionViewChapters">Chapter list</button>
+                <hr>
+            </div>
             <div id="autoGenDisplayTypes"></div>
             <button onclick="GUI.pageReader.edit();">Edit</button>
             <br>
             <button onclick="GUI.showTab('Home'); GUI.pageReader.toggleOptions();">Back</button>
         </div>
         <p id="pageUrl" onclick="window.open(this.innerText);event.stopPropagation();"></p>
+        <div id="bookHeader" class="bookPageHelper">
+            <button onclick="CONTROLLER.beforeChapter();event.stopPropagation()">Before</button>
+            <button onclick="CONTROLLER.nextChapter();event.stopPropagation()">Next</button>
+        </div>
         <div id="pageContent">
             <p id="pageContentTitle"></p>
             <div id="pageContentBody">
             </div>
+        </div>
+        <div id="bookFooter" class="bookPageHelper">
+            <button onclick="CONTROLLER.beforeChapter();event.stopPropagation()">Before</button>
+            <button onclick="CONTROLLER.nextChapter();event.stopPropagation()">Next</button>
         </div>
         <div id="editPanel" style="display: none;" class="styleColorUpdate">
             <div id="editPanelRemoveTexts">
