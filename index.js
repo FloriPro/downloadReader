@@ -1321,6 +1321,24 @@ class controller {
             ]
         })
     }
+
+    clearServiceWorkerCache() {
+        var promise = new Promise((resolve, reject) => {
+            var id = GUI.loader.add("Clearing service worker cache");
+            //send a message to the service worker to clear the cache
+            var messageChannel = new MessageChannel();
+            messageChannel.port1.onmessage = function (event) {
+                if (event.data.command == 'clearCache' && event.data.status == "success") {
+                    console.log('Cache cleared');
+                }
+            };
+            navigator.serviceWorker.controller.postMessage({ command: 'clearCache' }, [messageChannel.port2]);
+
+            GUI.loader.remove(id);
+            resolve();
+        });
+        return promise;
+    }
 }
 
 window.onload = () => {

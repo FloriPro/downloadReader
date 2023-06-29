@@ -17,6 +17,10 @@ self.addEventListener('install', (event) => {
     event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll(precacheResources)));
 });
 
+function downloadCache() {
+    return caches.open(cacheName).then((cache) => cache.addAll(precacheResources));
+}
+
 self.addEventListener('activate', (event) => {
     console.log('Service worker activate event!');
 });
@@ -35,4 +39,16 @@ self.addEventListener('fetch', (event) => {
             return f;
         }),
     );
+});
+
+self.addEventListener('message', async (event) => {
+    const data = event.data;
+    if (data.command == "clearCache") {
+        caches.delete(cacheName);
+        await downloadCache();
+        event.ports[0].postMessage({
+            command: "clearCache",
+            status: "success"
+        });
+    }
 });
