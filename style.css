@@ -126,7 +126,7 @@ body {
 }
 
 .minimalDownloadedPageUrl {
-    font-size: 12px;
+    font-size: 12px !important;
     color: #666;
     margin-left: 10px;
     margin-right: 10px;
