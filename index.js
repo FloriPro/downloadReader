@@ -343,10 +343,10 @@ class gui {
         deleteButton.classList.add('delete');
         deleteButton.innerText = "Delete";
         deleteButton.onclick = (event) => {
+            event.stopPropagation();
             if (!confirm("Are you sure you want to delete this book?")) {
                 return;
             }
-            event.stopPropagation();
             CONTROLLER.database.deleteBook(book.bookId).then(() => {
                 this.updatePages();
             });
@@ -577,9 +577,9 @@ class gui {
     }
 
     deletePage(url) {
+        event.stopPropagation();
         CONTROLLER.database.deletePage(url);
         this.updatePages();
-        event.stopPropagation();
     }
 
     showTab(tab) {
@@ -1875,7 +1875,11 @@ class controller {
             //check if book allready exists
             var book = await this.database.bookExists(bookid);
             if (type == "book" || !book) {
-                this.database.setBook(bookid, options.name, reader.content, reader.url);
+                let lastChapter = null;
+                if (book){
+                    lastChapter = (await this.database.getBook(bookid)).lastChapter;
+                }
+                this.database.setBook(bookid, options.name, reader.content, reader.url, lastChapter);
                 book = await this.database.getBook(bookid);
             }
             if (type == "chapter") {
