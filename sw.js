@@ -7,6 +7,7 @@ const precacheResources = [
     '/purify.js',
     '/Readability.js',
     '/sw.js',
+    "/colorEditor.js",
 ]
 
 // Choose a cache name

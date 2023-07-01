@@ -42,7 +42,7 @@ body {
     font-weight: bold;
 }
 
-.downloadedPage .chapterTitle{
+.downloadedPage .chapterTitle {
     font-size: 15px;
     font-weight: bold;
 }
@@ -195,6 +195,17 @@ button.delete:hover {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+}
+
+#loadingMessages {
+    max-height: calc(100% - 170px);
+    min-width: 70%;
+    max-width: 100%;
+
+    display: flex;
+    overflow: auto;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .lds-ellipsis {
@@ -441,7 +452,7 @@ button.delete:hover {
 
 }
 
-.bookPageHelper{
+.bookPageHelper {
     background-color: #00000025;
     display: flex;
     justify-content: center;
@@ -449,7 +460,8 @@ button.delete:hover {
 
     padding: 20px;
 }
-.bookPageHelper button{
+
+.bookPageHelper button {
     margin-left: 10px;
     margin-right: 10px;
 }
@@ -520,15 +532,15 @@ button.delete:hover {
 }
 
 .type1color #editPanelMassDownloadLinksList .selected {
-    background-color: rgb(0, 255, 0);
+    background-color: #00ff00;
 }
 
 .type1color #editPanelMassDownloadLinksList .notselected {
-    background-color: rgb(255 89 0);
+    background-color: #ff5900;
 }
 
 .type1color #editPanelMassDownloadLinksList .clicked {
-    background-color: rgb(0 171 255);
+    background-color: #00abff;
 }
 
 .type1color #selectWraper {
@@ -842,6 +854,302 @@ button.delete:hover {
 
 .atomicDarkColor .minimalDownloadedPageUrl {
     color: #999d9a;
+}
+
+
+/* ======================================== */
+/* type 6: solarizedLightColor */
+.solarizedLightColor {
+    color: #839496;
+    background-color: #fdf6e3;
+}
+
+.solarizedLightColor button.selected {
+    background-color: #f0f0f0 !important;
+    color: #535353;
+}
+
+.solarizedLightColor .styleColorUpdate,
+.solarizedLightColor button,
+.solarizedLightColor button:hover,
+.solarizedLightColor a {
+    background-color: #fdf6e3;
+    color: #839496;
+}
+
+.solarizedLightColor .downloadedPage {
+    background-color: #e7e2d5;
+    box-shadow: 0 0 10px #606b6e;
+    color: #839496;
+}
+
+.solarizedLightColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.solarizedLightColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.solarizedLightColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.solarizedLightColor #selectWraper {
+    background-color: #fdf6e3;
+    border: 1px solid #606b6e;
+}
+
+.solarizedLightColor #loading {
+    background-color: #fdf6e3;
+}
+
+.solarizedLightColor .lds-ellipsis div {
+    background-color: #839496;
+}
+
+.solarizedLightColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.solarizedLightColor .minimalDownloadedPageUrl {
+    color: #839496;
+}
+
+/* ======================================== */
+/* type 7: monokaiColor */
+.monokaiColor {
+    color: #f8f8f2;
+    background-color: #272822;
+}
+
+.monokaiColor button.selected {
+    background-color: #3e3d32 !important;
+    color: #f8f8f2;
+}
+
+.monokaiColor .styleColorUpdate,
+.monokaiColor button,
+.monokaiColor button:hover,
+.monokaiColor a {
+    background-color: #272822;
+    color: #f8f8f2;
+}
+
+.monokaiColor .downloadedPage {
+    background-color: #3e3d32;
+    box-shadow: 0 0 10px #606b6e;
+    color: #f8f8f2;
+}
+
+.monokaiColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.monokaiColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.monokaiColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.monokaiColor #selectWraper {
+    background-color: #272822;
+    border: 1px solid #606b6e;
+}
+
+.monokaiColor #loading {
+    background-color: #272822;
+}
+
+.monokaiColor .lds-ellipsis div {
+    background-color: #f8f8f2;
+}
+
+.monokaiColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.monokaiColor .minimalDownloadedPageUrl {
+    color: #839496;
+}
+
+/* ======================================== */
+/* type 8: DraculaColor */
+.draculaColor {
+    color: #f8f8f2;
+    background-color: #282a36;
+}
+
+.draculaColor button.selected {
+    background-color: #3e3d32 !important;
+    color: #f8f8f2;
+}
+
+.draculaColor .styleColorUpdate,
+.draculaColor button,
+.draculaColor button:hover,
+.draculaColor a {
+    background-color: #282a36;
+    color: #f8f8f2;
+}
+
+.draculaColor .downloadedPage {
+    background-color: #3e3d32;
+    box-shadow: 0 0 10px #606b6e;
+    color: #f8f8f2;
+}
+
+.draculaColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.draculaColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.draculaColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.draculaColor #selectWraper {
+    background-color: #282a36;
+    border: 1px solid #606b6e;
+}
+
+.draculaColor #loading {
+    background-color: #282a36;
+}
+
+.draculaColor .lds-ellipsis div {
+    background-color: #f8f8f2;
+}
+
+.draculaColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.draculaColor .minimalDownloadedPageUrl {
+    color: #839496;
+}
+
+/* ======================================== */
+/* type 9: kimbieDarkColor */
+.kimbieDarkColor {
+    color: #f8f8f2;
+    background-color: #221a0f;
+}
+
+.kimbieDarkColor button.selected {
+    background-color: #3e3d32 !important;
+    color: #f8f8f2;
+}
+
+.kimbieDarkColor .styleColorUpdate,
+.kimbieDarkColor button,
+.kimbieDarkColor button:hover,
+.kimbieDarkColor a {
+    background-color: #221a0f;
+    color: #f8f8f2;
+}
+
+.kimbieDarkColor .downloadedPage {
+    background-color: #3e3d32;
+    box-shadow: 0 0 10px #606b6e;
+    color: #f8f8f2;
+}
+
+.kimbieDarkColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.kimbieDarkColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.kimbieDarkColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.kimbieDarkColor #selectWraper {
+    background-color: #221a0f;
+    border: 1px solid #606b6e;
+}
+
+.kimbieDarkColor #loading {
+    background-color: #221a0f;
+}
+
+.kimbieDarkColor .lds-ellipsis div {
+    background-color: #f8f8f2;
+}
+
+.kimbieDarkColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.kimbieDarkColor .minimalDownloadedPageUrl {
+    color: #839496;
+}
+
+/* ======================================== */
+/* type 10: iplasticColor */
+.iplasticColor {
+    color: #f8f8f2;
+    background-color: #1d1f21;
+}
+
+.iplasticColor button.selected {
+    background-color: #3e3d32 !important;
+    color: #f8f8f2;
+}
+
+.iplasticColor .styleColorUpdate,
+.iplasticColor button,
+.iplasticColor button:hover,
+.iplasticColor a {
+    background-color: #1d1f21;
+    color: #f8f8f2;
+}
+
+.iplasticColor .downloadedPage {
+    background-color: #3e3d32;
+    box-shadow: 0 0 10px #606b6e;
+    color: #f8f8f2;
+}
+
+.iplasticColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.iplasticColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.iplasticColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.iplasticColor #selectWraper {
+    background-color: #1d1f21;
+    border: 1px solid #606b6e;
+}
+
+.iplasticColor #loading {
+    background-color: #1d1f21;
+}
+
+.iplasticColor .lds-ellipsis div {
+    background-color: #f8f8f2;
+}
+
+.iplasticColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.iplasticColor .minimalDownloadedPageUrl {
+    color: #839496;
 }
 
 /* ======================================== */

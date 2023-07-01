@@ -58,8 +58,13 @@ class gui {
                 "Dark": "type2color",
                 "Dark Dark": "type23color",
                 "Mid Dark": "type3color",
-                "Solarized Dark": "solarizedDarkColor",
                 "Atomic Dark": "atomicDarkColor",
+                "Iplastic": "iplasticColor",
+                "Monokai": "monokaiColor",
+                "Dracula": "draculaColor",
+                "Kimbie Dark": "kimbieDarkColor",
+                "Solarized Dark": "solarizedDarkColor",
+                "Solarized Light": "solarizedLightColor",
             },
             Font: {
                 "Serif": "type1font",
@@ -99,7 +104,12 @@ class gui {
                     "Dark Dark": "#000000",
                     "Mid Dark": "#5a5151",
                     "Solarized Dark": "#002b36",
-                    "Atomic Dark": "1d1f21"
+                    "Atomic Dark": "1d1f21",
+                    "Solarized Light": "#fdf6e3",
+                    "Monokai": "#272822",
+                    "Dracula": "#282a36",
+                    "Kimbie Dark": "#221a0f",
+                    "Iplastic": "#1e1e1e",
                 }
                 meta.setAttribute("content", colors[type2]);
             }

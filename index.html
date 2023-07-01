@@ -11,6 +11,7 @@
     <script src="Readability.js"></script>
     <script src="JSDOM.js"></script>
     <script src="purify.js"></script>
+    <script src="colorEditor.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <!--Service Worker-->
@@ -29,7 +30,17 @@
     </script>
 </head>
 
+<script>
+    window.colorEditor = false;
+</script>
+
 <body>
+    <div id="debugColorEditor" style="display: none;">
+        <select id="debugColorEditorSelect">
+        </select>
+        <div id="debugColorEditorStyle">
+        </div>
+    </div>
     <div id="loading">
         <div class="lds-ellipsis">
             <div></div>
