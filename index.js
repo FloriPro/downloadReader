@@ -1375,6 +1375,31 @@ class database {
     }
 
     async setChapterOption(bookId, chapterId, name, value) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["chapters"], "readwrite");
+
+            var objectStore = transaction.objectStore("chapters");
+            var request = objectStore.get([bookId, chapterId]);
+            request.onerror = function (event) {
+                reject(event);
+            };
+
+            request.onsuccess = function (event) {
+                var page = event.target.result;
+                page.options[name] = value;
+                var requestUpdate = objectStore.put(page);
+                requestUpdate.onerror = function (event) {
+                    reject(event);
+                };
+                requestUpdate.onsuccess = function (event) {
+                    resolve(event);
+                };
+            };
+        });
+        var event = await promise;
+        return event;
     }
 
     async getPage(url) {
@@ -1938,7 +1963,7 @@ class controller {
                 this.database.setBook(bookid, book.name, book.content, book.url, book.lastChapter);
             }
             var chapter = await this.database.getChapter(bookid, book.lastChapter);
-            GUI.showBook(chapter.url, chapter.content, chapter.title, book.options, bookid, chapter.chapterId);
+            GUI.showBook(chapter.url, chapter.content, chapter.title, chapter.options, bookid, chapter.chapterId);
         } else {
             this.showBookChapters(bookid);
         }
@@ -1971,7 +1996,7 @@ class controller {
         }
         book.lastChapter = nextChapter.chapterId;
         this.database.setBook(book.bookId, book.name, book.content, book.url, book.lastChapter);
-        GUI.showBook(nextChapter.url, nextChapter.content, nextChapter.title, book.options, book.bookId, nextChapter.chapterId);
+        GUI.showBook(nextChapter.url, nextChapter.content, nextChapter.title, nextChapter.options, book.bookId, nextChapter.chapterId);
         GUI.loader.remove(id);
     }
     async beforeChapter() {
@@ -2001,7 +2026,7 @@ class controller {
         }
         book.lastChapter = nextChapter.chapterId;
         CONTROLLER.database.setBook(book.bookId, book.name, book.content, book.url, book.lastChapter);
-        GUI.showBook(nextChapter.url, nextChapter.content, nextChapter.title, book.options, book.bookId, nextChapter.chapterId);
+        GUI.showBook(nextChapter.url, nextChapter.content, nextChapter.title, nextChapter.options, book.bookId, nextChapter.chapterId);
 
         GUI.loader.remove(id);
     }
