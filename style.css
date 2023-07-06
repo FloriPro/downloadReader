@@ -275,6 +275,11 @@ button.delete:hover {
     }
 }
 
+.currentChapter {
+    font-weight: bold;
+    background-color: #00ff00 !important;
+    color: #000 !important;
+}
 
 #editPanel {
     position: fixed;
@@ -452,13 +457,31 @@ button.delete:hover {
 
 }
 
+#chaptersBookHeader {
+    padding: 5px;
+    position: sticky;
+    top: 0;
+}
+
+#chaptersBookHeader button {
+    margin: 0;
+    border: 1px solid #dbdbdb;
+    border-radius: 10px;
+    padding: 15px;
+    background-color: #ffffff00;
+}
+
 .bookPageHelper {
-    background-color: #00000025;
+    background-color: #8181817d;
     display: flex;
     justify-content: center;
     align-items: center;
 
     padding: 20px;
+}
+
+#bookFooter {
+    margin-bottom: 50px;
 }
 
 .bookPageHelper button {
@@ -1097,7 +1120,7 @@ button.delete:hover {
 /* type 10: iplasticColor */
 .iplasticColor {
     color: #f8f8f2;
-    background-color: #1d1f21;
+    background-color: #1e1e1e;
 }
 
 .iplasticColor button.selected {
@@ -1109,7 +1132,7 @@ button.delete:hover {
 .iplasticColor button,
 .iplasticColor button:hover,
 .iplasticColor a {
-    background-color: #1d1f21;
+    background-color: #1e1e1e;
     color: #f8f8f2;
 }
 
@@ -1132,12 +1155,12 @@ button.delete:hover {
 }
 
 .iplasticColor #selectWraper {
-    background-color: #1d1f21;
+    background-color: #1e1e1e;
     border: 1px solid #606b6e;
 }
 
 .iplasticColor #loading {
-    background-color: #1d1f21;
+    background-color: #1e1e1e;
 }
 
 .iplasticColor .lds-ellipsis div {

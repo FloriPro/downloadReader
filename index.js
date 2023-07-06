@@ -21,6 +21,14 @@ class gui {
         this.currentPage = null;
         this.pageDisplayTypes = null;
         this.loadDisplayTypes();
+
+        //save scroll position
+        //alert("scrollend " + (("onscrollend" in window) ? "supported" : "not supported"))
+        if ("onscrollend" in window) {
+            window.addEventListener('scrollend', this.saveScrollPosition.bind(this));
+        } else {
+            window.addEventListener('scroll', this.saveScrollPosition.bind(this));
+        }
     }
 
     async toggleMinimalMode() {
@@ -105,11 +113,11 @@ class gui {
                     "Mid Dark": "#5a5151",
                     "Solarized Dark": "#002b36",
                     "Atomic Dark": "1d1f21",
+                    "Iplastic": "#1e1e1e",
                     "Solarized Light": "#fdf6e3",
                     "Monokai": "#272822",
                     "Dracula": "#282a36",
                     "Kimbie Dark": "#221a0f",
-                    "Iplastic": "#1e1e1e",
                 }
                 meta.setAttribute("content", colors[type2]);
             }
@@ -200,8 +208,6 @@ class gui {
         }
 
         this.loader.remove(id);
-
-        window.scrollTo(0, 0);
     }
 
 
@@ -218,7 +224,6 @@ class gui {
         div.classList.add('chapter');
         div.classList.add(this.switcher(this.minimalMode, "minimalDownloadedPage", "downloadedPage"));
         div.onclick = (event) => {
-            window.scrollTo(0, 0);
             event.stopPropagation();
             CONTROLLER.showBook(book.bookId, chapter.chapterId);
         }
@@ -271,7 +276,6 @@ class gui {
         div.classList.add('book');
         div.classList.add(this.switcher(this.minimalMode, "minimalDownloadedPage", "downloadedPage"));
         div.onclick = (event) => {
-            window.scrollTo(0, 0);
             event.stopPropagation();
             CONTROLLER.showBook(book.bookId);
         }
@@ -576,7 +580,6 @@ class gui {
         return div;
     }
     pageClick(url) {
-        window.scrollTo(0, 0);
         event.stopPropagation();
         CONTROLLER.showPage(url);
     }
@@ -661,11 +664,36 @@ class gui {
         CONTROLLER.database.setOption("pageDisplayTypes", selectedFullNames);
     }
 
+    async saveScrollPosition() {
+        if (this.currentPage == null) {
+            return;
+        }
+        const scroll = window.scrollY;
+        await this.pageReader.setPageOption("scroll", scroll);
+        console.log("saved scroll position: " + scroll);
+    }
+
+    applyScrollPosition() {
+        const loaderScrollPos = this.loader.add("Loading scroll position...");
+        this.pageReader.getOption("scroll").then(scroll => {
+            if (scroll != null) {
+                window.scrollTo(0, scroll);
+                console.log("loaded scroll position: " + scroll);
+            } else {
+                window.scrollTo(0, 0);
+            }
+            this.loader.remove(loaderScrollPos);
+        }).catch(err => {
+            console.log(err);
+            this.loader.remove(loaderScrollPos);
+        });
+    }
+
     showPage(url, content, title, options) {
-        window.scrollTo(0, 0);
         this.showTab("Page");
         document.querySelector("#bookOptions").style.display = "none";
         document.querySelector('#bookHeader').style.display = "none";
+        document.querySelector('#chaptersBookHeader').style.display = "none";
         document.querySelector('#bookFooter').style.display = "none";
 
         document.querySelector('#pageUrl').innerText = url;
@@ -674,6 +702,8 @@ class gui {
 
         this.currentPage = url;
         this.currentPageType = "page";
+
+        this.applyScrollPosition();
     }
 
     showBook(url, content, title, options, bookId, chapterId) {
@@ -684,14 +714,32 @@ class gui {
             document.querySelector("#bookOptionViewChapters").style.display = "";
             document.querySelector('#bookHeader').style.display = "";
             document.querySelector('#bookFooter').style.display = "";
-        }else{
+        } else {
+            document.querySelector('#chaptersBookHeader').style.display = "";
             document.querySelector("#bookOptionViewBook").style.display = "";
             document.querySelector("#bookOptionViewChapters").style.display = "none";
+
+            //mark current chapter
+            CONTROLLER.database.getBook(bookId).then(async book => {
+                let currentChapterUrl = null;
+                currentChapterUrl = book.lastChapter;
+                if (currentChapterUrl == null) {
+                    return;
+                }
+
+                currentChapterUrl = (await CONTROLLER.database.getChapter(bookId, currentChapterUrl)).url;
+                console.log(currentChapterUrl);
+
+                const selector = `a[href="javascript:CONTROLLER.pageClicked(\`${currentChapterUrl}\`)"]`
+                document.querySelector(selector).classList.add("currentChapter")
+            });
         }
 
         this.currentChapterId = chapterId;
         this.currentBookId = bookId;
         this.currentPageType = "book";
+
+        this.applyScrollPosition();
     }
 
     openSelect(data) {
@@ -838,12 +886,9 @@ class pageReader {
     }
 
     async makeEditPanel() {
+        // sourcery skip: use-ternary-operator
         if (GUI.currentPageType == "book") {
-            if (GUI.currentChapterId == null) {
-                var data = await CONTROLLER.database.getBook(GUI.currentBookId);
-            } else {
-                var data = await CONTROLLER.database.getChapter(GUI.currentBookId, GUI.currentChapterId);
-            }
+            var data = GUI.currentChapterId == null ? await CONTROLLER.database.getBook(GUI.currentBookId) : await CONTROLLER.database.getChapter(GUI.currentBookId, GUI.currentChapterId);
         } else {
             var data = await CONTROLLER.database.getPage(GUI.currentPage);
         }
@@ -856,7 +901,7 @@ class pageReader {
         if (data.options.replaceTexts) {
             this.replaceTexts = data.options.replaceTexts;
         }
-        var editPanelRemoveTextsList = document.querySelector('#editPanelRemoveTextsList');
+        let editPanelRemoveTextsList = document.querySelector('#editPanelRemoveTextsList');
         editPanelRemoveTextsList.innerHTML = '';
         for (var t of this.removedTexts) {
             var p = document.createElement('p');
@@ -866,7 +911,7 @@ class pageReader {
             editPanelRemoveTextsList.appendChild(p);
         }
 
-        var editPanelReplaceTextsList = document.querySelector('#editPanelReplaceTextsList');
+        let editPanelReplaceTextsList = document.querySelector('#editPanelReplaceTextsList');
         editPanelReplaceTextsList.innerHTML = '';
         for (var t of this.replaceTexts) {
             var p = document.createElement('p');
@@ -907,6 +952,24 @@ class pageReader {
         }
     }
 
+    async getOption(option) {
+        // sourcery skip: use-ternary-operator
+        if (GUI.currentPageType == "book") {
+            var data = GUI.currentChapterId == null ? await CONTROLLER.database.getBook(GUI.currentBookId) : await CONTROLLER.database.getChapter(GUI.currentBookId, GUI.currentChapterId);
+        } else {
+            var data = await CONTROLLER.database.getPage(GUI.currentPage);
+        }
+
+        if (data == null) {
+            return null;
+        }
+
+        if (data.options[option]) {
+            return data.options[option];
+        }
+        return null;
+    }
+
     addRemoveText() {
         var text = document.querySelector('#editPanelRemoveTextsInput').value;
         if (text && text != "" && text != " ") {
@@ -943,21 +1006,18 @@ class pageReader {
 
         document.querySelector("#editPanelMassDownloadLinksList").style.display = "";
         document.querySelector("#editPanelMassDownloadLinksList").innerHTML = "";
+        // sourcery skip: use-ternary-operator
         if (GUI.currentPageType == "book") {
-            if (GUI.currentChapterId == null) {
-                var data = await CONTROLLER.database.getBook(GUI.currentBookId);
-            } else {
-                var data = await CONTROLLER.database.getChapter(GUI.currentBookId, GUI.currentChapterId);
-            }
+            var data = GUI.currentChapterId == null ? await CONTROLLER.database.getBook(GUI.currentBookId) : await CONTROLLER.database.getChapter(GUI.currentBookId, GUI.currentChapterId);
         } else {
             var data = await CONTROLLER.database.getPage(GUI.currentPage);
         }
 
-        var htmdiv = document.createElement("div");
+        let htmdiv = document.createElement("div");
         htmdiv.innerHTML = data.content;
-        var links = htmdiv.querySelectorAll("a");
+        let links = htmdiv.querySelectorAll("a");
 
-        var plinks = [];
+        let plinks = [];
         for (var link of links) {
             var p = document.createElement("p");
             p.innerText = link.innerText + " >> " + link.href;
@@ -1911,7 +1971,7 @@ class controller {
             var book = await this.database.bookExists(bookid);
             if (type == "book" || !book) {
                 let lastChapter = null;
-                if (book){
+                if (book) {
                     lastChapter = (await this.database.getBook(bookid)).lastChapter;
                 }
                 this.database.setBook(bookid, options.name, reader.content, reader.url, lastChapter);
@@ -2066,9 +2126,15 @@ class controller {
         GUI.pageReader.optionsOpen = false;
         GUI.pageReader.updateOptions();
         if (GUI.currentPageType == "book") {
-            var chapterId = await this.database.getBookChapterIdFromUrl(GUI.currentBookId, url);
+            const chapterId = await this.database.getBookChapterIdFromUrl(GUI.currentBookId, url);
             if (chapterId != null) {
                 this.showBook(GUI.currentBookId, chapterId);
+                return;
+            }
+        } else if (GUI.currentPageType == "page") {
+            const downloadedPage = await this.database.getPage(url);
+            if (downloadedPage != null) {
+                this.showPage(url);
                 return;
             }
         }
