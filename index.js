@@ -25,8 +25,10 @@ class gui {
         //save scroll position
         //alert("scrollend " + (("onscrollend" in window) ? "supported" : "not supported"))
         if ("onscrollend" in window) {
+            this.cooldown = null;
             window.addEventListener('scrollend', this.saveScrollPosition.bind(this));
         } else {
+            this.cooldown = 0;
             window.addEventListener('scroll', this.saveScrollPosition.bind(this));
         }
     }
@@ -668,7 +670,15 @@ class gui {
         if (this.currentPage == null) {
             return;
         }
+        const cooldownTimeout = 250;
+        if (this.cooldown != null && new Date().getTime() - this.cooldown < cooldownTimeout) {
+            return;
+        }
+
         const scroll = window.scrollY;
+        if (this.cooldown != null) {
+            this.cooldown = new Date().getTime();
+        }
         await this.pageReader.setPageOption("scroll", scroll);
         console.log("saved scroll position: " + scroll);
     }
