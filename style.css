@@ -400,12 +400,14 @@ button.delete:hover {
 
 .page a {
     color: #000;
-    text-decoration: dotted underline;
+    text-decoration: underline;
+    text-decoration-style: dashed;
     text-decoration-thickness: 1.5px;
 }
 
 .page .downloaded {
     text-decoration: underline;
+    text-decoration-style: solid;
     text-decoration-thickness: 3px;
 }
 

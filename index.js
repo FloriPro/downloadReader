@@ -1797,6 +1797,24 @@ class database {
         return event.target.result.filter((chapter) => chapter.bookId == bookId);
     }
 
+    async getAllChapters() {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["chapters"]);
+            var objectStore = transaction.objectStore("chapters");
+            var request = objectStore.getAll();
+            request.onerror = function (event) {
+                reject(event);
+            }
+            request.onsuccess = function (event) {
+                resolve(event);
+            }
+        });
+        var event = await promise;
+        return event.target.result;
+    }
+
     async getChapterFromUrl(url) {
         await this.dbOpen();
 
@@ -1946,8 +1964,16 @@ class reader {
 
     async applyAsyncOptions(div, options) {
         //mark all undownloaded pages
+        const books = await CONTROLLER.database.getBooks();
+        const chapters = await CONTROLLER.database.getAllChapters();
+        const pages = await CONTROLLER.database.getPages();
+
+        const bookUrls = books.map((book) => book.url);
+        const chapterUrls = chapters.map((chapter) => chapter.url);
+        const pageUrls = pages.map((page) => page.url);
+
         div.querySelectorAll("a").forEach(async (element) => {
-            console.log(element);
+            //console.log(element);
             var ogLink = element.getAttribute("href");
             if (!ogLink) {
                 return;
@@ -1957,7 +1983,7 @@ class reader {
             ogLink = ogLink.replaceAll("`)", "");
 
             //check if page is downloaded
-            console.log(await CONTROLLER.database.getChapterFromUrl(ogLink))
+            /*console.log(await CONTROLLER.database.getChapterFromUrl(ogLink))
             var bookId = await CONTROLLER.database.getPage(ogLink);
             if (!bookId) {
                 bookId = await CONTROLLER.database.getChapterFromUrl(ogLink);
@@ -1971,7 +1997,16 @@ class reader {
             
             if (bookId) {
                 element.classList.add("downloaded");
+            }else{
+                element.classList.add("notdownloaded");
             }
+            */
+            if (bookUrls.includes(ogLink) || chapterUrls.includes(ogLink) || pageUrls.includes(ogLink)) {
+                element.classList.add("downloaded");
+            } else {
+                element.classList.add("notdownloaded");
+            }
+            
         });
     }
 
