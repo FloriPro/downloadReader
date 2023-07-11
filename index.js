@@ -710,6 +710,8 @@ class gui {
         document.querySelector('#pageContentBody').innerHTML = CONTROLLER.reader.applyOptions(content, options);
         document.querySelector('#pageContentTitle').innerText = title;
 
+        CONTROLLER.reader.applyAsyncOptions(document.querySelector('#pageContentBody'), options);
+
         this.currentPage = url;
         this.currentPageType = "page";
 
@@ -1819,6 +1821,30 @@ class database {
         return null;
     }
 
+    async getBookFromUrl(url) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["books"]);
+            var objectStore = transaction.objectStore("books");
+            var request = objectStore.getAll();
+            request.onerror = function (event) {
+                reject(event);
+            }
+            request.onsuccess = function (event) {
+                resolve(event);
+            }
+        });
+        var event = await promise;
+        var books = event.target.result;
+        for (var i = 0; i < books.length; i++) {
+            if (books[i].url == url) {
+                return books[i];
+            }
+        }
+        return null;
+    }
+
     async getBookChapterIdFromUrl(bookId, url) {
         var chapters = await this.getChapters(bookId);
         for (var i = 0; i < chapters.length; i++) {
@@ -1916,6 +1942,37 @@ class reader {
         });
 
         return div.innerHTML;
+    }
+
+    async applyAsyncOptions(div, options) {
+        //mark all undownloaded pages
+        div.querySelectorAll("a").forEach(async (element) => {
+            console.log(element);
+            var ogLink = element.getAttribute("href");
+            if (!ogLink) {
+                return;
+            }
+
+            ogLink = ogLink.replaceAll("javascript:CONTROLLER.pageClicked(`", "");
+            ogLink = ogLink.replaceAll("`)", "");
+
+            //check if page is downloaded
+            console.log(await CONTROLLER.database.getChapterFromUrl(ogLink))
+            var bookId = await CONTROLLER.database.getPage(ogLink);
+            if (!bookId) {
+                bookId = await CONTROLLER.database.getChapterFromUrl(ogLink);
+                if (!bookId) {
+                    bookId = await CONTROLLER.database.getBookFromUrl(ogLink);
+                    if (!bookId) {
+                        element.classList.add("notdownloaded");
+                    }
+                }
+            }
+            
+            if (bookId) {
+                element.classList.add("downloaded");
+            }
+        });
     }
 
     /**
