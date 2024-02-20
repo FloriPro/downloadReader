@@ -1,3 +1,5 @@
+var SKIPSANIZING = true;
+
 class gui {
     constructor() {
         this.pageReader = new pageReader();
@@ -1902,8 +1904,11 @@ class reader {
             var cleanArticle = DOMPurify.sanitize(article.content);
         } catch (e) {
             console.error(e);
-
-            var r = await GUI.asyncSelect("Error while sanitizing article. Do you want to continue?", ["Yes", "No"]);
+            if (SKIPSANIZING) {
+                r = "Yes";
+            } else {
+                var r = await GUI.asyncSelect("Error while sanitizing article. Do you want to continue?", ["Yes", "No"]);
+            }
             if (r == "Yes") {
                 var cleanArticle = article.content;
             } else {
@@ -2006,7 +2011,7 @@ class reader {
             } else {
                 element.classList.add("notdownloaded");
             }
-            
+
         });
     }
 
