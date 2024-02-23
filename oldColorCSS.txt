@@ -1,0 +1,682 @@
+
+.type1container #pageContent {
+    border: 5px;
+    padding: 20px;
+    border-radius: 10px;
+    overflow: auto;
+    box-shadow: 0 0 10px #ccc;
+    margin: 10px;
+}
+
+.type1container.type1color #pageContent {
+    box-shadow: 0 0 10px #ccc;
+}
+
+.type1container.type2color #pageContent {
+    box-shadow: 0 0 10px #5f5f5f;
+}
+
+.type1container.type23color #pageContent {
+    box-shadow: 0 0 10px #2e2e2e;
+}
+
+.type2container #pageContent {
+    overflow: auto;
+}
+
+.type3container #pageContent {
+    overflow: auto;
+    padding: 20px;
+    margin: 10px;
+}
+
+
+
+
+/* ======================================== */
+/* type 1 */
+.type1color {
+    color: #1e1d25;
+    background-color: #fff;
+}
+
+.type1color button.selected {
+    background-color: #d6d6d6 !important;
+}
+
+.type1color .styleColorUpdate,
+.type1color button,
+.type1color button:hover,
+.type1color a {
+    background-color: #fff;
+    color: #1e1d25;
+}
+
+.type1color .downloadedPage {
+    background-color: #f2f2f2;
+    box-shadow: 0 0 10px #ccc;
+    color: black;
+}
+
+.type1color #editPanelMassDownloadLinksList .selected {
+    background-color: #00ff00;
+}
+
+.type1color #editPanelMassDownloadLinksList .notselected {
+    background-color: #ff5900;
+}
+
+.type1color #editPanelMassDownloadLinksList .clicked {
+    background-color: #00abff;
+}
+
+.type1color #selectWraper {
+    background-color: #fff;
+    border: 1px solid #ccc;
+}
+
+.type1color #loading {
+    background-color: #fff;
+}
+
+.type1color .lds-ellipsis div {
+    background-color: #000000;
+}
+
+.type1color .minimalDownloadedPageName {
+    color: blue;
+}
+
+.type1color .minimalDownloadedPageUrl {
+    color: #ccc;
+}
+
+/* ======================================== */
+/* type 2 */
+.type2color {
+    color: #fff;
+    background-color: #000000;
+}
+
+.type2color button.selected {
+    background-color: #d6d6d6 !important;
+}
+
+.type2color .styleColorUpdate,
+.type2color button,
+.type2color button:hover,
+.type2color a {
+    background-color: #000000;
+    color: #fff;
+}
+
+.type2color .downloadedPage {
+    background-color: #1f1f1f;
+    box-shadow: 0 0 10px #5f5f5f;
+    color: white;
+}
+
+.type2color #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(0, 136, 0);
+}
+
+.type2color #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(163, 0, 0);
+}
+
+.type2color #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(0, 0, 163);
+}
+
+.type2color #selectWraper {
+    background-color: #000;
+    border: 1px solid #5f5f5f;
+}
+
+.type2color #loading {
+    background-color: #000;
+}
+
+.type2color .lds-ellipsis div {
+    background-color: #fff;
+}
+
+.type2color .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.type2color .minimalDownloadedPageUrl {
+    color: #ccc;
+}
+
+/* ======================================== */
+/* type 23 */
+.type23color {
+    color: #9e9e9e;
+    background-color: #000000;
+}
+
+.type23color button.selected {
+    background-color: #d6d6d6 !important;
+}
+
+.type23color .styleColorUpdate,
+.type23color button,
+.type23color button:hover,
+.type23color a {
+    background-color: #000000;
+    color: #9e9e9e;
+}
+
+.type23color .downloadedPage {
+    background-color: #000000;
+    box-shadow: 0 0 10px #2e2e2e;
+    color: #9e9e9e;
+}
+
+.type23color #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(0, 94, 0);
+}
+
+.type23color #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(119, 0, 0);
+}
+
+.type23color #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(0, 0, 119);
+}
+
+.type23color #selectWraper {
+    background-color: #000;
+    border: 1px solid #2e2e2e;
+}
+
+.type23color #loading {
+    background-color: #000;
+}
+
+.type23color .lds-ellipsis div {
+    background-color: #9e9e9e;
+}
+
+.type23color .minimalDownloadedPageName {
+    color: #4774ce;
+}
+
+.type23color .minimalDownloadedPageUrl {
+    color: #9e9e9e;
+}
+
+/* ======================================== */
+/* type 3 */
+.type3color {
+    color: #fff;
+    background-color: #5a5151;
+}
+
+.type3color button.selected {
+    background-color: #d6d6d6 !important;
+}
+
+.type3color .styleColorUpdate,
+.type3color button,
+.type3color button:hover,
+.type3color a {
+    background-color: #5a5151;
+    color: #fff;
+}
+
+.type3color .downloadedPage {
+    background-color: #6d6464;
+    box-shadow: 0 0 10px #3d3d3d80;
+    color: white;
+}
+
+.type3color #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(0, 191, 0);
+}
+
+.type3color #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(231 0 0);
+}
+
+.type3color #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(0, 0, 231);
+}
+
+.type3color #selectWraper {
+    background-color: #5a5151;
+    border: 1px solid #3d3d3d80;
+}
+
+.type3color #loading {
+    background-color: #5a5151;
+}
+
+.type3color .lds-ellipsis div {
+    background-color: #fff;
+}
+
+.type3color .minimalDownloadedPageName {
+    color: #5794dd;
+}
+
+.type3color .minimalDownloadedPageUrl {
+    color: #adadad;
+}
+
+/* ======================================== */
+/* type 4: solarizedDarkColor */
+.solarizedDarkColor {
+    color: #839496;
+    background-color: #002b36;
+}
+
+.solarizedDarkColor button.selected {
+    background-color: #07495a !important;
+    color: #e5e5e5;
+}
+
+.solarizedDarkColor .styleColorUpdate,
+.solarizedDarkColor button,
+.solarizedDarkColor button:hover,
+.solarizedDarkColor a {
+    background-color: #002b36;
+    color: #839496;
+}
+
+.solarizedDarkColor .downloadedPage {
+    background-color: #144d5b;
+    box-shadow: 0 0 10px #606b6e;
+    color: #839496;
+}
+
+.solarizedDarkColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.solarizedDarkColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.solarizedDarkColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.solarizedDarkColor #selectWraper {
+    background-color: #002b36;
+    border: 1px solid #606b6e;
+}
+
+.solarizedDarkColor #loading {
+    background-color: #002b36;
+}
+
+.solarizedDarkColor .lds-ellipsis div {
+    background-color: #839496;
+}
+
+.solarizedDarkColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.solarizedDarkColor .minimalDownloadedPageUrl {
+    color: #839496;
+}
+
+/* ======================================== */
+/* type 5: atomicDarkColor */
+.atomicDarkColor {
+    color: #c5c8c6;
+    background-color: #1d1f21;
+}
+
+.atomicDarkColor button.selected {
+    background-color: #2b2b2b !important;
+    color: #e5e5e5;
+}
+
+.atomicDarkColor .styleColorUpdate,
+.atomicDarkColor button,
+.atomicDarkColor button:hover,
+.atomicDarkColor a {
+    background-color: #1d1f21;
+    color: #c5c8c6;
+}
+
+.atomicDarkColor .downloadedPage {
+    background-color: #2b2b2b;
+    box-shadow: 0 0 10px #606b6e;
+    color: #c5c8c6;
+}
+
+.atomicDarkColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.atomicDarkColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.atomicDarkColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.atomicDarkColor #selectWraper {
+    background-color: #1d1f21;
+    border: 1px solid #606b6e;
+}
+
+.atomicDarkColor #loading {
+    background-color: #1d1f21;
+}
+
+.atomicDarkColor .lds-ellipsis div {
+    background-color: #c5c8c6;
+}
+
+.atomicDarkColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.atomicDarkColor .minimalDownloadedPageUrl {
+    color: #999d9a;
+}
+
+
+/* ======================================== */
+/* type 6: solarizedLightColor */
+.solarizedLightColor {
+    color: #839496;
+    background-color: #fdf6e3;
+}
+
+.solarizedLightColor button.selected {
+    background-color: #f0f0f0 !important;
+    color: #535353;
+}
+
+.solarizedLightColor .styleColorUpdate,
+.solarizedLightColor button,
+.solarizedLightColor button:hover,
+.solarizedLightColor a {
+    background-color: #fdf6e3;
+    color: #839496;
+}
+
+.solarizedLightColor .downloadedPage {
+    background-color: #e7e2d5;
+    box-shadow: 0 0 10px #606b6e;
+    color: #839496;
+}
+
+.solarizedLightColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.solarizedLightColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.solarizedLightColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.solarizedLightColor #selectWraper {
+    background-color: #fdf6e3;
+    border: 1px solid #606b6e;
+}
+
+.solarizedLightColor #loading {
+    background-color: #fdf6e3;
+}
+
+.solarizedLightColor .lds-ellipsis div {
+    background-color: #839496;
+}
+
+.solarizedLightColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.solarizedLightColor .minimalDownloadedPageUrl {
+    color: #839496;
+}
+
+/* ======================================== */
+/* type 7: monokaiColor */
+.monokaiColor {
+    color: #f8f8f2;
+    background-color: #272822;
+}
+
+.monokaiColor button.selected {
+    background-color: #3e3d32 !important;
+    color: #f8f8f2;
+}
+
+.monokaiColor .styleColorUpdate,
+.monokaiColor button,
+.monokaiColor button:hover,
+.monokaiColor a {
+    background-color: #272822;
+    color: #f8f8f2;
+}
+
+.monokaiColor .downloadedPage {
+    background-color: #3e3d32;
+    box-shadow: 0 0 10px #606b6e;
+    color: #f8f8f2;
+}
+
+.monokaiColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.monokaiColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.monokaiColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.monokaiColor #selectWraper {
+    background-color: #272822;
+    border: 1px solid #606b6e;
+}
+
+.monokaiColor #loading {
+    background-color: #272822;
+}
+
+.monokaiColor .lds-ellipsis div {
+    background-color: #f8f8f2;
+}
+
+.monokaiColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.monokaiColor .minimalDownloadedPageUrl {
+    color: #839496;
+}
+
+/* ======================================== */
+/* type 8: DraculaColor */
+.draculaColor {
+    color: #f8f8f2;
+    background-color: #282a36;
+}
+
+.draculaColor button.selected {
+    background-color: #3e3d32 !important;
+    color: #f8f8f2;
+}
+
+.draculaColor .styleColorUpdate,
+.draculaColor button,
+.draculaColor button:hover,
+.draculaColor a {
+    background-color: #282a36;
+    color: #f8f8f2;
+}
+
+.draculaColor .downloadedPage {
+    background-color: #3e3d32;
+    box-shadow: 0 0 10px #606b6e;
+    color: #f8f8f2;
+}
+
+.draculaColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.draculaColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.draculaColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.draculaColor #selectWraper {
+    background-color: #282a36;
+    border: 1px solid #606b6e;
+}
+
+.draculaColor #loading {
+    background-color: #282a36;
+}
+
+.draculaColor .lds-ellipsis div {
+    background-color: #f8f8f2;
+}
+
+.draculaColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.draculaColor .minimalDownloadedPageUrl {
+    color: #839496;
+}
+
+/* ======================================== */
+/* type 9: kimbieDarkColor */
+.kimbieDarkColor {
+    color: #f8f8f2;
+    background-color: #221a0f;
+}
+
+.kimbieDarkColor button.selected {
+    background-color: #3e3d32 !important;
+    color: #f8f8f2;
+}
+
+.kimbieDarkColor .styleColorUpdate,
+.kimbieDarkColor button,
+.kimbieDarkColor button:hover,
+.kimbieDarkColor a {
+    background-color: #221a0f;
+    color: #f8f8f2;
+}
+
+.kimbieDarkColor .downloadedPage {
+    background-color: #3e3d32;
+    box-shadow: 0 0 10px #606b6e;
+    color: #f8f8f2;
+}
+
+.kimbieDarkColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.kimbieDarkColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.kimbieDarkColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.kimbieDarkColor #selectWraper {
+    background-color: #221a0f;
+    border: 1px solid #606b6e;
+}
+
+.kimbieDarkColor #loading {
+    background-color: #221a0f;
+}
+
+.kimbieDarkColor .lds-ellipsis div {
+    background-color: #f8f8f2;
+}
+
+.kimbieDarkColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.kimbieDarkColor .minimalDownloadedPageUrl {
+    color: #839496;
+}
+
+/* ======================================== */
+/* type 10: iplasticColor */
+.iplasticColor {
+    color: #f8f8f2;
+    background-color: #1e1e1e;
+}
+
+.iplasticColor button.selected {
+    background-color: #3e3d32 !important;
+    color: #f8f8f2;
+}
+
+.iplasticColor .styleColorUpdate,
+.iplasticColor button,
+.iplasticColor button:hover,
+.iplasticColor a {
+    background-color: #1e1e1e;
+    color: #f8f8f2;
+}
+
+.iplasticColor .downloadedPage {
+    background-color: #3e3d32;
+    box-shadow: 0 0 10px #606b6e;
+    color: #f8f8f2;
+}
+
+.iplasticColor #editPanelMassDownloadLinksList .selected {
+    background-color: rgb(27 67 100);
+}
+
+.iplasticColor #editPanelMassDownloadLinksList .notselected {
+    background-color: rgb(100 27 27);
+}
+
+.iplasticColor #editPanelMassDownloadLinksList .clicked {
+    background-color: rgb(27 27 100);
+}
+
+.iplasticColor #selectWraper {
+    background-color: #1e1e1e;
+    border: 1px solid #606b6e;
+}
+
+.iplasticColor #loading {
+    background-color: #1e1e1e;
+}
+
+.iplasticColor .lds-ellipsis div {
+    background-color: #f8f8f2;
+}
+
+.iplasticColor .minimalDownloadedPageName {
+    color: #578eff;
+}
+
+.iplasticColor .minimalDownloadedPageUrl {
+    color: #839496;
+}
+
+/* ======================================== */

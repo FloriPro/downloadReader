@@ -61,9 +61,11 @@ class gui {
     async loadDisplayTypes() {
         this.pageDisplayTypes = {
             Margin: {
-                "Type 1": "type1container",
-                "Type 2": "type2container",
-                "Type 3": "type3container",
+                "middle spacing, border": "type1container",
+                "small spacing": "smallSpacingContainer",
+                "middle spacing ": "middleSpacingContainer",
+                "large spacing": "largeSpacingContainer",
+                "no spacing": "type2container",
             },
             Color: {
                 "Light": "type1color",
@@ -284,6 +286,18 @@ class gui {
             CONTROLLER.showBook(book.bookId);
         }
 
+        var downloadedPageInfoDiv = document.createElement('div');
+
+        if (book.image != null) {
+            var img = document.createElement('img');
+            img.src = book.image;
+            img.classList.add(this.switcher(this.minimalMode, "minimalDownloadedPageImage", 'bookImage'));
+            div.append(img);
+
+            downloadedPageInfoDiv.classList.add("hasImage");
+        }
+
+
         if (this.minimalMode) {
             div = document.createElement('div');
             div.classList.add("minimalDownloadedPageInfoWrapper");
@@ -293,7 +307,7 @@ class gui {
         const title = document.createElement('p');
         title.classList.add(this.switcher(this.minimalMode, "minimalDownloadedPageName", 'title'));
         title.innerText = book.name;
-        div.appendChild(title);
+        downloadedPageInfoDiv.appendChild(title);
 
         //Tree View
         let wrapper = document.createElement('div');
@@ -335,7 +349,7 @@ class gui {
                 wrapper.appendChild(closeBtn);
             }
         });
-        div.appendChild(pages);
+        downloadedPageInfoDiv.appendChild(pages);
 
         const navigationButton = document.createElement('button');
         navigationButton.classList.add('bookNavigationButton');
@@ -344,7 +358,7 @@ class gui {
             event.stopPropagation();
             CONTROLLER.showBookChapters(book.bookId);
         }
-        div.appendChild(navigationButton);
+        downloadedPageInfoDiv.appendChild(navigationButton);
 
         const redownloadButton = document.createElement('button');
         redownloadButton.classList.add(this.switcher(this.minimalMode, "minimalRedownload", 'bookRedownloadButton'));
@@ -354,7 +368,7 @@ class gui {
             event.stopPropagation();
             CONTROLLER.getPage(book.url)
         }
-        div.appendChild(redownloadButton);
+        downloadedPageInfoDiv.appendChild(redownloadButton);
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add(this.switcher(this.minimalMode, "minimalDelete", 'bookDeleteButton'));
@@ -369,10 +383,11 @@ class gui {
                 this.updatePages();
             });
         }
-        div.appendChild(deleteButton);
+        downloadedPageInfoDiv.appendChild(deleteButton);
 
-        div.appendChild(wrapper);
+        downloadedPageInfoDiv.appendChild(wrapper);
 
+        div.appendChild(downloadedPageInfoDiv);
 
         return divTop;
     }
@@ -546,9 +561,12 @@ class gui {
             return this.getMinimalPage(url);
         }
 
+        const divTop = document.createElement('div');
+        divTop.classList.add('downloadedPage');
+        divTop.onclick = this.pageClick.bind(this, url);
+
         const div = document.createElement('div');
-        div.classList.add('downloadedPage');
-        div.onclick = this.pageClick.bind(this, url);
+        divTop.appendChild(div);
 
         const pUrl = document.createElement('p');
         pUrl.innerText = url;
@@ -581,7 +599,7 @@ class gui {
         });
 
 
-        return div;
+        return divTop;
     }
     pageClick(url) {
         event.stopPropagation();
@@ -654,6 +672,9 @@ class gui {
         }
 
         this.pageDisplayTypesSelected[type] = this.pageDisplayTypes[type][type2];
+        if (this.pageDisplayTypesDom[type].items[type2] == null) {
+            type2 = Object.keys(this.pageDisplayTypes[type])[0];
+        }
         this.pageDisplayTypesDom[type].items[type2].classList.add('selected');
         document.querySelector("body").classList.remove(old);
         document.querySelector("body").classList.add(this.pageDisplayTypesSelected[type]);
@@ -837,6 +858,11 @@ class gui {
             });
         });
     }
+
+    async asyncAlert(title) {
+        var r = await this.asyncSelect(title, ["OK"]);
+        return r;
+    }
 }
 
 /**
@@ -859,6 +885,11 @@ class pageReader {
      * @param {MouseEvent} event 
      */
     click(event) {
+        //if clicked on top or bottom of screen
+        if ((event.clientY < 100 || event.clientY > window.innerHeight - 100) && !this.optionsOpen) {
+            return;
+        }
+
         //if #pageOptions is not clicked
         if (!event.composedPath().includes(document.querySelector('#pageOptions')) && !event.composedPath().includes(document.querySelector('#editPanel'))) {
             this.toggleOptions();
@@ -1262,6 +1293,20 @@ class api {
         return promise;
     }
 
+    async #asyncDataGet(url) {
+        var d = await fetch(this.url + url);
+        //return data url: data:image/jpg;base64,
+        var data = await d.blob();
+        var reader = new FileReader();
+        reader.readAsDataURL(data);
+        var promise = new Promise((resolve, reject) => {
+            reader.onloadend = function () {
+                resolve(reader.result);
+            }
+        });
+        return await promise;
+    }
+
     #post(url, data, callback, error = null) {
         fetch(this.url + url, {
             method: 'POST',
@@ -1292,6 +1337,10 @@ class api {
 
     async getPage(url) {
         return await this.#asyncGet('page?url=' + url);
+    }
+
+    async getImage(url) {
+        return await this.#asyncDataGet('page?url=' + url + "&type=data");
     }
 }
 
@@ -1723,15 +1772,56 @@ class database {
                 reject(event);
             };
             var objectStore = transaction.objectStore("books");
-            var request = objectStore.put({
-                bookId: bookId,
-                name: name,
-                content: content,
-                url: url,
-                lastChapter: lastChapter,
-                options: options,
-                date: new Date()
-            });
+            var getRequest = objectStore.get(bookId);
+            getRequest.onerror = function (event) {
+                reject(event);
+            };
+            getRequest.onsuccess = function (event) {
+                var book = event.target.result;
+                var image = book ? book.image : null;
+                var request = objectStore.put({
+                    bookId: bookId,
+                    name: name,
+                    content: content,
+                    url: url,
+                    lastChapter: lastChapter,
+                    options: options,
+                    date: new Date(),
+                    image: image
+                });
+            };
+        });
+        var event = await promise;
+        return event;
+    }
+
+    async addBookImage(bookId, image) {
+        await this.dbOpen();
+
+        var promise = new Promise((resolve, reject) => {
+            var transaction = this.db.transaction(["books"], "readwrite");
+            transaction.oncomplete = function (event) {
+                resolve(event);
+            };
+            transaction.onerror = function (event) {
+                reject(event);
+            };
+            var objectStore = transaction.objectStore("books");
+            var request = objectStore.get(bookId);
+            request.onerror = function (event) {
+                reject(event);
+            };
+            request.onsuccess = function (event) {
+                var book = event.target.result;
+                book.image = image;
+                var requestUpdate = objectStore.put(book);
+                requestUpdate.onerror = function (event) {
+                    reject(event);
+                };
+                requestUpdate.onsuccess = function (event) {
+                    resolve(event);
+                };
+            };
         });
         var event = await promise;
         return event;
@@ -1904,15 +1994,21 @@ class reader {
             var cleanArticle = DOMPurify.sanitize(article.content);
         } catch (e) {
             console.error(e);
-            if (SKIPSANIZING) {
-                r = "Yes";
+            if (article == null) {
+                await GUI.asyncAlert("Error while loading article. Article is null.");
+                cleanArticle = "<p>Article could not be loaded from site</p>";
+                article = { title: "Error Loading" };
             } else {
-                var r = await GUI.asyncSelect("Error while sanitizing article. Do you want to continue?", ["Yes", "No"]);
-            }
-            if (r == "Yes") {
-                var cleanArticle = article.content;
-            } else {
-                cleanArticle = "<p>Article could not be sanitized.</p>";
+                if (SKIPSANIZING) {
+                    r = "Yes";
+                } else {
+                    var r = await GUI.asyncSelect("Error while sanitizing article. Do you want to continue?", ["Yes", "No"]);
+                }
+                if (r == "Yes") {
+                    var cleanArticle = article.content;
+                } else {
+                    cleanArticle = "<p>Article could not be sanitized.</p>";
+                }
             }
         }
         return { content: cleanArticle, title: article.title, url: url };
@@ -2016,7 +2112,7 @@ class reader {
     }
 
     /**
-     * @returns {[boolean, string, string, string, {[key:string ]: string}]} [isBook, type: chapter|book, bookid, chapter, {options}]
+     * @returns {[boolean, string, string, string, string, {[key:string ]: string}]} [isBook, type: chapter|book, bookid, chapter, {options}]
      */
     checkForBook(htmlText, url) {
         //check if page has meta tag with "downloadreaderbook"="<bookid>"
@@ -2030,6 +2126,7 @@ class reader {
 
         var bookid = meta.getAttribute("content");
         var type = "book" // or chapter
+        var image = null;
 
         var chapter = null;
         var metaChapter = dom.querySelector("meta[name='downloadReaderChapter']");
@@ -2045,7 +2142,12 @@ class reader {
             options.name = dom.querySelector("title").textContent;
         }
 
-        return [true, type, bookid, chapter, options];
+        var metaImage = dom.querySelector("meta[name='downloadReaderImage']");
+        if (metaImage) {
+            image = metaImage.getAttribute("content");
+        }
+
+        return [true, type, bookid, chapter, image, options];
     }
 }
 
@@ -2073,7 +2175,7 @@ class controller {
         var reader = await this.reader.convertToReader(p.content, p.url);
 
         if (isBook[0]) {
-            var [isbook, type, bookid, chapter, options] = isBook;
+            var [isbook, type, bookid, chapter, imageUrl, options] = isBook;
             //check if book allready exists
             var book = await this.database.bookExists(bookid);
             if (type == "book" || !book) {
@@ -2083,6 +2185,12 @@ class controller {
                 }
                 this.database.setBook(bookid, options.name, reader.content, reader.url, lastChapter);
                 book = await this.database.getBook(bookid);
+
+                if (imageUrl) {
+                    var imageData = await this.api.getImage(imageUrl);
+                    console.log(imageData);
+                    await this.database.addBookImage(bookid, imageData);
+                }
             }
             if (type == "chapter") {
                 this.database.addChapter(bookid, chapter, reader.content, reader.title, reader.url);
