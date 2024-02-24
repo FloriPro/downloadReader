@@ -152,6 +152,10 @@ class gui {
         CONTROLLER.getPage(url);
     }
 
+    urlAddCancel() {
+        document.getElementById('addUrlDiv').style.display = "none";
+    }
+
     async updatePages() {
         this.minimalMode = await CONTROLLER.database.getOption("minimalMode");
         if (this.minimalMode == undefined || this.minimalMode == null) {
@@ -337,8 +341,10 @@ class gui {
                     CONTROLLER.database.setOption("pagedBookTreeClosed", urlGroupClosed);
                     if (ul.classList.contains('pageTreeWrapperClosed')) {
                         closeBtn.innerText = ">";
+                        div.classList.remove('bookTreeWrapperOpen');
                     } else {
                         closeBtn.innerText = "X";
+                        div.classList.add('bookTreeWrapperOpen');
                     }
                 });
 
@@ -379,8 +385,10 @@ class gui {
             if (!confirm("Are you sure you want to delete this book?")) {
                 return;
             }
+            var id = GUI.loader.add();
             CONTROLLER.database.deleteBook(book.bookId).then(() => {
                 this.updatePages();
+                GUI.loader.remove(id);
             });
         }
         downloadedPageInfoDiv.appendChild(deleteButton);
@@ -886,7 +894,7 @@ class pageReader {
      */
     click(event) {
         //if clicked on top or bottom of screen
-        if ((event.clientY < 100 || event.clientY > window.innerHeight - 100) && !this.optionsOpen) {
+        if ((event.clientY < window.innerHeight / 5 || event.clientY > window.innerHeight / 5 * 4 || event.clientX < window.innerWidth / 5 || event.clientX > window.innerWidth / 5 * 4) && !this.optionsOpen) {
             return;
         }
 
@@ -1073,13 +1081,30 @@ class pageReader {
         this.massDownloadStuff.setLinks(plinks);
     }
 
-    applyMassDownloadLinks() {
+    async applyMassDownloadLinks() {
         var links = this.massDownloadStuff.getLinks();
         this.cancelMassDownloadLinks();
 
+        var maxCount = 30;
+        var currentRunning = [];
+
         for (var link of links) {
-            CONTROLLER.getPage(link);
+            ((link) => {
+                var prom = new Promise(async (resolve, reject) => {
+                    await CONTROLLER.getPage(link, false);
+                    resolve();
+
+                    //remove from currentRunning
+                    currentRunning.splice(currentRunning.indexOf(prom), 1);
+                });
+                currentRunning.push(prom);
+            })(link);
+            if (currentRunning.length >= maxCount) {
+                await Promise.race(currentRunning);
+            }
         }
+        await Promise.all(currentRunning);
+        await GUI.updatePages();
     }
     cancelMassDownloadLinks() {
         document.querySelector("#editPanelMassDownloadLinksApply").style.display = 'none';
@@ -1736,7 +1761,9 @@ class database {
 
         var chapters = await this.getChapters(bookId);
         for (var i = 0; i < chapters.length; i++) {
+            var lid = GUI.loader.add("Deleting chapter " + (i + 1) + " of " + chapters.length);
             await this.deleteChapter(bookId, chapters[i].chapterId);
+            GUI.loader.remove(lid);
         }
         return event;
     }
@@ -2157,7 +2184,7 @@ class controller {
         this.reader = new reader();
         this.database = new database();
     }
-    async getPage(url) {
+    async getPage(url, update = true) {
         var id = GUI.loader.add("Downloading page " + url);
         try {
             var p = await this.api.getPage(url);
@@ -2178,28 +2205,66 @@ class controller {
             var [isbook, type, bookid, chapter, imageUrl, options] = isBook;
             //check if book allready exists
             var book = await this.database.bookExists(bookid);
+            var bookExists = book;
             if (type == "book" || !book) {
                 let lastChapter = null;
                 if (book) {
                     lastChapter = (await this.database.getBook(bookid)).lastChapter;
                 }
-                this.database.setBook(bookid, options.name, reader.content, reader.url, lastChapter);
+                await this.database.setBook(bookid, options.name, reader.content, reader.url, lastChapter);
                 book = await this.database.getBook(bookid);
 
                 if (imageUrl) {
                     var imageData = await this.api.getImage(imageUrl);
-                    console.log(imageData);
                     await this.database.addBookImage(bookid, imageData);
+                }
+
+                if (!bookExists) {
+                    var a = await GUI.asyncSelect("Do you want to download all chapters?", ["Yes", "No"]);
+                    if (a == "Yes") {
+                        var idChapters = GUI.loader.add("Downloading chapters");
+                        var page = (await this.database.getBook(bookid)).content;
+                        var pageDiv = document.createElement('div');
+                        pageDiv.innerHTML = page;
+                        var linksA = pageDiv.querySelectorAll("a");
+                        var links = [];
+                        for (var i = 0; i < linksA.length; i++) {
+                            links.push(linksA[i].getAttribute("href"));
+                        }
+
+                        var maxCount = 30;
+                        var currentRunning = [];
+                        for (var link of links) {
+                            ((link) => {
+                                var prom = new Promise(async (resolve, reject) => {
+                                    await CONTROLLER.getPage(link, false);
+                                    resolve();
+
+                                    //remove from currentRunning
+                                    currentRunning.splice(currentRunning.indexOf(prom), 1);
+                                });
+                                currentRunning.push(prom);
+                            })(link);
+                            if (currentRunning.length >= maxCount) {
+                                await Promise.race(currentRunning);
+                            }
+                        }
+                        await Promise.all(currentRunning);
+                        GUI.updatePages();
+                        GUI.loader.remove(idChapters);
+                    }
                 }
             }
             if (type == "chapter") {
-                this.database.addChapter(bookid, chapter, reader.content, reader.title, reader.url);
+                await this.database.addChapter(bookid, chapter, reader.content, reader.title, reader.url);
             }
         } else {
             await this.database.addPage(reader.url, reader.content, reader.title);
         }
 
-        GUI.updatePages();
+        if (update) {
+            GUI.updatePages();
+        }
         GUI.loader.remove(id);
 
         return isBook;
@@ -2421,3 +2486,5 @@ var CONTROLLER;
  * @type {gui}
  */
 var GUI;
+
+console.log("Loaded");
