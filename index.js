@@ -148,6 +148,7 @@ class gui {
         if (url == "" || url == null) {
             return;
         }
+        document.querySelector("#addUrlUrl").value="";
         document.getElementById('addUrlDiv').style.display = "none";
         CONTROLLER.getPage(url);
     }
